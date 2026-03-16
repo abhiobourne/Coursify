@@ -36,7 +36,7 @@ export function FavoriteVideoCard({ video }: FavoriteVideoCardProps) {
                     </div>
 
                     {/* Duration Badge */}
-                    <div className="absolute bottom-3 right-3 z-20 bg-black/80 backdrop-blur-md px-2 py-1 rounded-md text-xs font-medium text-white shadow-lg">
+                    <div className="absolute bottom-3 right-3 z-20 bg-background/80 backdrop-blur-md px-2 py-1 rounded-md text-xs font-medium text-foreground shadow-lg border border-border">
                         {formatDuration(video.duration)}
                     </div>
                 </div>

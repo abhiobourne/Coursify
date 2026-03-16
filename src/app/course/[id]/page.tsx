@@ -335,23 +335,23 @@ export default function CoursePlayer() {
 
             {/* Playlist Sidebar */}
             <div className={cn(
-                "w-full md:w-[400px] bg-zinc-900/50 border-l border-white/5 flex flex-col h-full",
+                "w-full md:w-[400px] bg-card border-l border-border flex flex-col h-full",
                 sidebarOpen ? "block" : "hidden md:flex"
             )}>
-                <div className="p-6 border-b border-white/5 shrink-0 glass z-10 flex flex-col gap-4">
+                <div className="p-6 border-b border-border shrink-0 glass z-10 flex flex-col gap-4">
                     <div>
-                        <h2 className="text-lg font-bold text-white mb-4 line-clamp-1">{course.title}</h2>
+                        <h2 className="text-lg font-bold text-foreground mb-4 line-clamp-1">{course.title}</h2>
                         <ProgressBar progress={progressPercent} size="md" />
                     </div>
 
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <input
                             type="search"
                             value={sidebarSearchQuery}
                             onChange={(e) => setSidebarSearchQuery(e.target.value)}
                             placeholder="Search videos..."
-                            className="w-full bg-black/40 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors"
+                            className="w-full bg-muted border border-border rounded-lg pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
                         />
                     </div>
                 </div>
@@ -368,7 +368,7 @@ export default function CoursePlayer() {
                                 }}
                                 className={cn(
                                     "w-full text-left p-3 rounded-xl flex items-start gap-4 transition-all duration-300 group",
-                                    isActive ? "bg-primary/20 border border-primary/30" : "hover:bg-white/5 border border-transparent"
+                                    isActive ? "bg-primary/10 border border-primary/20" : "hover:bg-accent border border-transparent"
                                 )}
                             >
                                 <div className="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-zinc-800">
@@ -384,12 +384,12 @@ export default function CoursePlayer() {
                                 <div className="flex-1 min-w-0 pr-2">
                                     <p className={cn(
                                         "text-sm font-medium mb-1 line-clamp-2 leading-tight",
-                                        isActive ? "text-white" : "text-zinc-300 group-hover:text-white"
+                                        isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
                                     )}>
-                                        <span className="text-zinc-500 mr-2">{idx + 1}.</span>
+                                        <span className="text-muted-foreground mr-2">{idx + 1}.</span>
                                         {video.title}
                                     </p>
-                                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                         <span className="flex items-center gap-1">
                                             {video.isCompleted ? (
                                                 <CheckCircle className="w-3 h-3 text-green-400" />

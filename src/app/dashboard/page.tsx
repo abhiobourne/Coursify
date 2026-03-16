@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { getUserCourses, deleteCourse, getFavoriteVideos, Course, FavoriteVideo } from "@/lib/courses";
 import { CourseCard } from "@/components/ui/CourseCard";
 import { FavoriteVideoCard } from "@/components/ui/FavoriteVideoCard";
-import { Loader2, BookOpen, Plus, Trash2, Library, Star } from "lucide-react";
+import { AddCourseDialog } from "@/components/ui/AddCourseDialog";
+import { Button } from "@/components/ui/button";
+import { Loader2, BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -76,20 +78,17 @@ export default function Dashboard() {
                     <p className="text-muted-foreground">Track and manage your YouTube learning journey.</p>
                 </div>
                 <div className="flex items-center gap-4 w-full md:w-auto">
-                    <input
-                        type="search"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search courses or favorite videos..."
-                        className="flex-1 md:w-64 bg-zinc-900/50 border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary/50 text-foreground"
-                    />
-                    <Link
-                        href="/"
-                        className="shrink-0 inline-flex items-center gap-2 bg-primary hover:opacity-90 text-primary-foreground px-4 py-2 rounded-lg transition-colors border border-transparent"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add Course
-                    </Link>
+                    <div className="relative flex-1 md:w-64">
+                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                            type="search"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search courses..."
+                            className="w-full bg-muted/50 border border-border rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-primary/50 text-foreground"
+                        />
+                    </div>
+                    <AddCourseDialog />
                 </div>
             </div>
 
@@ -125,12 +124,12 @@ export default function Dashboard() {
                             {courses.length === 0 ? "You haven't imported any YouTube playlists or videos yet." : "No courses match your search."}
                         </p>
                         {courses.length === 0 && (
-                            <Link
-                                href="/"
-                                className="inline-flex flex-col items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity shadow-lg"
-                            >
-                                Create Your First Course
-                            </Link>
+                            <AddCourseDialog>
+                                <Button className="px-8 py-6 rounded-2xl text-lg font-bold shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                    <Plus className="w-6 h-6 mr-2" />
+                                    Import Your First Course
+                                </Button>
+                            </AddCourseDialog>
                         )}
                     </div>
                 ) : (

@@ -67,6 +67,64 @@ export interface DailyActivity {
     updatedAt: any;
 }
 
+// Helper to get YouTube ID from URL
+export function getYouTubeIdFromUrl(url: string): string | null {
+    let parsedUrl = url;
+    if (!parsedUrl.startsWith('http')) {
+        parsedUrl = 'https://' + parsedUrl;
+    }
+
+    try {
+        const urlObj = new URL(parsedUrl);
+        const playlistId = urlObj.searchParams.get('list');
+        if (playlistId) return playlistId;
+
+        const videoIdMatch = parsedUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+        if (videoIdMatch && videoIdMatch[1]) return videoIdMatch[1];
+    } catch (e) {
+        return null;
+    }
+    return null;
+}
+
+// Get a single course by ID
+export async function getCourse(courseId: string): Promise<Course | null> {
+    const courseRef = doc(db, 'courses', courseId);
+    const courseSnap = await getDoc(courseRef);
+    if (courseSnap.exists()) {
+        return { id: courseSnap.id, ...courseSnap.data() } as Course;
+    }
+    return null;
+}
+
+// Full import flow
+export async function importCourse(userId: string, url: string): Promise<string> {
+    const ytId = getYouTubeIdFromUrl(url);
+    if (!ytId) throw new Error("Invalid YouTube URL");
+
+    // 1. Check if course already exists
+    const courseId = `${userId}_${ytId}`;
+    const existing = await getCourse(courseId);
+    if (existing) return existing.id;
+
+    // 2. Fetch metadata from API
+    const res = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+    });
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to parse YouTube URL");
+    }
+
+    const ytData = await res.json();
+
+    // 3. Create the course in Firestore
+    return await createCourseFromYouTube(userId, url, ytData);
+}
+
 // Save a new course from YouTube Data
 export async function createCourseFromYouTube(
     userId: string,
@@ -139,16 +197,7 @@ export async function getUserCourses(userId: string): Promise<Course[]> {
     });
 }
 
-// Get a specific course
-export async function getCourse(courseId: string): Promise<Course | null> {
-    const docRef = doc(db, 'courses', courseId);
-    const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-        return { ...docSnap.data(), id: docSnap.id } as Course;
-    }
-    return null;
-}
 
 // Get all videos for a course
 export async function getCourseVideos(courseId: string): Promise<CourseVideo[]> {

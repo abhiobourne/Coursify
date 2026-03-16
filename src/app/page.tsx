@@ -15,63 +15,15 @@ export default function Home() {
 
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url) return;
+    if (!url || !user) return;
 
     setIsLoading(true);
     setError("");
 
     try {
-      // 0. Parse logic to check if course already exists directly
-      let parsedUrl = url;
-      if (!parsedUrl.startsWith('http')) {
-        parsedUrl = 'https://' + parsedUrl;
-      }
-
-      const urlObj = new URL(parsedUrl);
-      const playlistId = urlObj.searchParams.get('list');
-      let videoId = "";
-      const match = parsedUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
-      if (match && match[1]) { videoId = match[1]; }
-      const ytId = playlistId || videoId;
-
-      if (ytId && user) {
-        const { getCourse } = await import("@/lib/courses");
-        const existingCourse = await getCourse(`${user.uid}_${ytId}`);
-        if (existingCourse) {
-          router.push(`/course/${existingCourse.id}`);
-          return;
-        }
-      }
-
-      // 1. Fetch from Next.js API route
-      const res = await fetch('/api/youtube', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to parse YouTube URL");
-      }
-
-      const ytData = await res.json();
-
-      // 2. We have the metadata.
-      // Now we would typically save this to Firestore right here or on the backend
-      // Because we need to call createCourseFromYouTube, let's just navigate to a
-      // processing/importing page or do it directly if we had a server action.
-      // Since createCourseFromYouTube is in lib/courses (client-side capable with Firebase SDK):
-
-      const { createCourseFromYouTube } = await import("@/lib/courses");
-      const courseId = await createCourseFromYouTube(user!.uid, url, ytData);
-
-      // Give Firestore a moment to sync before we redirect
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // 3. Navigate to Dashboard or Course directly
+      const { importCourse } = await import("@/lib/courses");
+      const courseId = await importCourse(user.uid, url);
       router.push(`/course/${courseId}`);
-
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please check your URL.");
     } finally {

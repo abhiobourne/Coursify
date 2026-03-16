@@ -77,7 +77,7 @@ export function CourseCard({ course, onDelete }: CourseCardProps) {
                         ))}
                         <button
                             onClick={handleAddTag}
-                            className="bg-white/5 border border-white/10 text-muted-foreground hover:text-foreground text-xs px-2 py-1 rounded-md flex items-center gap-1 transition-colors"
+                            className="bg-muted hover:bg-zinc-200 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground text-xs px-2 py-1 rounded-md flex items-center gap-1 transition-colors border border-border"
                         >
                             <Tag className="w-3 h-3" />
                             Add
@@ -98,7 +98,7 @@ export function CourseCard({ course, onDelete }: CourseCardProps) {
                                     e.stopPropagation();
                                     onDelete(course.id);
                                 }}
-                                className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors z-30"
+                                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors z-30"
                                 title="Delete Course"
                             >
                                 <Trash2 className="w-4 h-4" />
