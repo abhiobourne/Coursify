@@ -23,6 +23,7 @@ export interface Course {
     thumbnailUrl: string;
     totalDuration: number;
     completedDuration: number;
+    description?: string;
     createdAt: any;
     updatedAt: any;
     tags?: string[];
@@ -37,10 +38,11 @@ export interface CourseVideo {
     isCompleted: boolean;
     isFavorite?: boolean;
     order: number;
+    startTime?: number; // start time in seconds for segments
 }
 
 export interface FavoriteVideo {
-    id: string; // Composite: userId_courseId_videoId
+    id: string; // Composite: userId_courseId_videoId[_startTime]
     userId: string;
     courseId: string;
     videoId: string;
@@ -48,6 +50,7 @@ export interface FavoriteVideo {
     thumbnailUrl: string;
     duration: number;
     createdAt: any;
+    startTime?: number;
 }
 
 export interface Note {
@@ -105,7 +108,7 @@ export async function importCourse(userId: string, url: string): Promise<string>
     // 1. Check if course already exists
     const courseId = `${userId}_${ytId}`;
     const existing = await getCourse(courseId);
-    if (existing) return existing.id;
+    if (existing) return "EXISTS_" + existing.id;
 
     // 2. Fetch metadata from API
     const res = await fetch('/api/youtube', {
@@ -122,7 +125,8 @@ export async function importCourse(userId: string, url: string): Promise<string>
     const ytData = await res.json();
 
     // 3. Create the course in Firestore
-    return await createCourseFromYouTube(userId, url, ytData);
+    const newId = await createCourseFromYouTube(userId, url, ytData);
+    return "CREATED_" + newId;
 }
 
 // Save a new course from YouTube Data
@@ -155,6 +159,7 @@ export async function createCourseFromYouTube(
         thumbnailUrl: ytData.thumbnailUrl,
         totalDuration: ytData.totalDuration,
         completedDuration: 0,
+        description: ytData.description || "",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     });
@@ -162,7 +167,9 @@ export async function createCourseFromYouTube(
     // 2. Save Videos
     ytData.videos.forEach((video, index) => {
         // We use a composite ID for videos to ensure uniqueness within a course
-        const videoRef = doc(db, 'course_videos', `${courseId}_${video.id}`);
+        // Since one YouTube ID can have multiple segments, we include startTime in the doc ID
+        const segmentSuffix = video.startTime ? `_s${video.startTime}` : '';
+        const videoRef = doc(db, 'course_videos', `${courseId}_${video.id}${segmentSuffix}`);
         batch.set(videoRef, {
             id: video.id,
             courseId: courseId,
@@ -171,7 +178,8 @@ export async function createCourseFromYouTube(
             duration: video.duration,
             isCompleted: false,
             isFavorite: false,
-            order: index
+            order: index,
+            startTime: video.startTime || 0
         });
     });
 
@@ -219,9 +227,11 @@ export async function toggleVideoCompletion(
     courseId: string,
     videoId: string,
     currentStatus: boolean,
-    duration: number
+    duration: number,
+    startTime: number = 0
 ): Promise<void> {
-    const videoRef = doc(db, 'course_videos', `${courseId}_${videoId}`);
+    const segmentSuffix = startTime ? `_s${startTime}` : '';
+    const videoRef = doc(db, 'course_videos', `${courseId}_${videoId}${segmentSuffix}`);
     const courseRef = doc(db, 'courses', courseId);
 
     const batch = writeBatch(db);
@@ -237,19 +247,8 @@ export async function toggleVideoCompletion(
     });
 
     // Update Daily Activity
-    if (userId) {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const activityRef = doc(db, 'activity', `${userId}_${todayStr}`);
-
-        // We use set with merge:true because the document might not exist yet
-        batch.set(activityRef, {
-            id: `${userId}_${todayStr}`,
-            userId,
-            dateStr: todayStr,
-            secondsStudied: increment(durationChange),
-            updatedAt: serverTimestamp()
-        }, { merge: true });
-    }
+    // Note: Activity tracking is now handled by the heartbeat mechanism in CoursePlayer
+    // to ensure time is recorded even if the video isn't marked as complete.
 
     await batch.commit();
 }
@@ -259,9 +258,11 @@ export async function saveVideoNote(
     userId: string,
     courseId: string,
     videoId: string,
-    content: string
+    content: string,
+    startTime: number = 0
 ): Promise<void> {
-    const noteId = `${userId}_${videoId}`;
+    const segmentSuffix = startTime ? `_s${startTime}` : '';
+    const noteId = `${userId}_${videoId}${segmentSuffix}`;
     const noteRef = doc(db, 'notes', noteId);
 
     await setDoc(noteRef, {
@@ -275,8 +276,9 @@ export async function saveVideoNote(
 }
 
 // Get note for a video
-export async function getVideoNote(userId: string, videoId: string): Promise<Note | null> {
-    const noteId = `${userId}_${videoId}`;
+export async function getVideoNote(userId: string, videoId: string, startTime: number = 0): Promise<Note | null> {
+    const segmentSuffix = startTime ? `_s${startTime}` : '';
+    const noteId = `${userId}_${videoId}${segmentSuffix}`;
     const noteRef = doc(db, 'notes', noteId);
     const docSnap = await getDoc(noteRef);
 
@@ -316,10 +318,11 @@ export async function toggleVideoFavorite(
     video: CourseVideo,
     isCurrentlyFavorite: boolean
 ): Promise<void> {
-    const favId = `${userId}_${courseId}_${video.id}`;
+    const segmentSuffix = video.startTime ? `_s${video.startTime}` : '';
+    const favId = `${userId}_${courseId}_${video.id}${segmentSuffix}`;
     const favRef = doc(db, 'favorites', favId);
 
-    const videoRef = doc(db, 'course_videos', `${courseId}_${video.id}`);
+    const videoRef = doc(db, 'course_videos', `${courseId}_${video.id}${segmentSuffix}`);
     const batch = writeBatch(db);
 
     batch.update(videoRef, { isFavorite: !isCurrentlyFavorite });
@@ -335,6 +338,7 @@ export async function toggleVideoFavorite(
             title: video.title,
             thumbnailUrl: video.thumbnailUrl,
             duration: video.duration,
+            startTime: video.startTime || 0,
             createdAt: serverTimestamp()
         });
     }
@@ -378,4 +382,20 @@ export async function getUserActivity(userId: string): Promise<DailyActivity[]> 
     const snapshot = await getDocs(q);
     const activities = snapshot.docs.map(doc => doc.data() as DailyActivity);
     return activities.sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+}
+
+// Record study time (heartbeat)
+export async function recordStudyTime(userId: string, seconds: number): Promise<void> {
+    if (!userId || seconds <= 0) return;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const activityRef = doc(db, 'activity', `${userId}_${todayStr}`);
+
+    await setDoc(activityRef, {
+        id: `${userId}_${todayStr}`,
+        userId,
+        dateStr: todayStr,
+        secondsStudied: increment(seconds),
+        updatedAt: serverTimestamp()
+    }, { merge: true });
 }

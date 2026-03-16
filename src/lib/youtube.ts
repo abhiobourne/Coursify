@@ -5,12 +5,14 @@ export interface YouTubeVideoData {
     title: string;
     thumbnailUrl: string;
     duration: number; // in seconds
+    startTime?: number; // start time in seconds for segments
 }
 
 export interface YouTubeCourseData {
     id: string;
     title: string;
     thumbnailUrl: string;
+    description?: string;
     isPlaylist: boolean;
     videos: YouTubeVideoData[];
     totalDuration: number;
@@ -26,6 +28,34 @@ function parseISO8601Duration(duration: string): number {
     const seconds = match[3] ? parseInt(match[3].replace('S', '')) : 0;
 
     return hours * 3600 + minutes * 60 + seconds;
+}
+
+// Helper to parse timestamps from description (e.g., "01:20 - Intro")
+function parseTimestamps(description: string, totalDuration: number): { time: number; label: string }[] {
+    const timestamps: { time: number; label: string }[] = [];
+    // Match formats like "01:22", "1:22:33", "(01:22)", "[1:22]"
+    const regex = /(?:\(|\[)?((?:\d{1,2}:)?\d{1,2}:\d{2})(?:\)|\])?(?:\s+-\s+|\s+|:\s+)(.+)/g;
+    let match;
+
+    while ((match = regex.exec(description)) !== null) {
+        const timeStr = match[1];
+        const label = match[2].trim();
+
+        const parts = timeStr.split(':').map(p => parseInt(p));
+        let seconds = 0;
+        if (parts.length === 3) {
+            seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        } else if (parts.length === 2) {
+            seconds = parts[0] * 60 + parts[1];
+        }
+
+        if (seconds < totalDuration) {
+            timestamps.push({ time: seconds, label });
+        }
+    }
+
+    // Sort by time
+    return timestamps.sort((a, b) => a.time - b.time);
 }
 
 export async function fetchYouTubeData(url: string): Promise<YouTubeCourseData> {
@@ -97,6 +127,7 @@ async function fetchPlaylistData(playlistId: string, apiKey: string): Promise<Yo
     const listData = await listRes.json();
     const playlistTitle = listData.items?.[0]?.snippet?.title || "Imported Playlist";
     const playlistThumbnail = listData.items?.[0]?.snippet?.thumbnails?.high?.url || videos[0]?.thumbnailUrl;
+    const playlistDescription = listData.items?.[0]?.snippet?.description || "";
 
     const totalDuration = videos.reduce((acc, v) => acc + v.duration, 0);
 
@@ -104,6 +135,7 @@ async function fetchPlaylistData(playlistId: string, apiKey: string): Promise<Yo
         id: playlistId,
         title: playlistTitle,
         thumbnailUrl: playlistThumbnail,
+        description: playlistDescription,
         isPlaylist: true,
         videos,
         totalDuration
@@ -129,21 +161,42 @@ async function fetchSingleVideoData(videoId: string, apiKey: string): Promise<Yo
     const item = data.items[0];
     const duration = parseISO8601Duration(item.contentDetails.duration);
     const title = item.snippet.title;
+    const description = item.snippet.description || "";
     const thumbnailUrl = item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url;
 
-    const video: YouTubeVideoData = {
-        id: videoId,
-        title,
-        thumbnailUrl,
-        duration
-    };
+    const timestamps = parseTimestamps(description, duration);
+    let videos: YouTubeVideoData[] = [];
+
+    if (timestamps.length >= 2) {
+        // Create segments
+        for (let i = 0; i < timestamps.length; i++) {
+            const start = timestamps[i].time;
+            const end = (i < timestamps.length - 1) ? timestamps[i + 1].time : duration;
+            videos.push({
+                id: videoId,
+                title: timestamps[i].label,
+                thumbnailUrl,
+                duration: end - start,
+                startTime: start
+            });
+        }
+    } else {
+        videos.push({
+            id: videoId,
+            title,
+            thumbnailUrl,
+            duration,
+            startTime: 0
+        });
+    }
 
     return {
         id: videoId,
         title,
         thumbnailUrl,
+        description,
         isPlaylist: false,
-        videos: [video],
+        videos,
         totalDuration: duration
     };
 }

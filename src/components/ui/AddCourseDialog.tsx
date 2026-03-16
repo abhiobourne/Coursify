@@ -21,6 +21,8 @@ export function AddCourseDialog({ children }: { children?: React.ReactNode }) {
     const [url, setUrl] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [statusMessage, setStatusMessage] = useState("");
+    const [isSuccess, setIsSuccess] = useState(false);
     const [open, setOpen] = useState(false);
 
     const handleImport = async (e: React.FormEvent) => {
@@ -31,9 +33,22 @@ export function AddCourseDialog({ children }: { children?: React.ReactNode }) {
         setError("");
 
         try {
-            const courseId = await importCourse(user.uid, url);
-            setOpen(false);
-            router.push(`/course/${courseId}`);
+            const result = await importCourse(user.uid, url);
+            setIsSuccess(true);
+
+            if (result.startsWith("EXISTS_")) {
+                setStatusMessage("Course already exists, redirecting you...");
+                setTimeout(() => {
+                    setOpen(false);
+                    router.push(`/course/${result.replace("EXISTS_", "")}`);
+                }, 2000);
+            } else {
+                setStatusMessage("Course created, redirecting...");
+                setTimeout(() => {
+                    setOpen(false);
+                    router.push(`/course/${result.replace("CREATED_", "")}`);
+                }, 2000);
+            }
         } catch (err: any) {
             setError(err.message || "Failed to import course. Please check the URL.");
         } finally {
@@ -73,8 +88,28 @@ export function AddCourseDialog({ children }: { children?: React.ReactNode }) {
                                 required
                                 className="flex-1 bg-transparent border-none outline-none py-3 px-3 text-foreground placeholder:text-muted-foreground text-sm"
                             />
+                            <div className="pr-2">
+                                <Button
+                                    type="submit"
+                                    disabled={isLoading || isSuccess || !url}
+                                    size="icon"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-8 w-8 shadow-sm"
+                                >
+                                    {isLoading || isSuccess ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <ArrowRight className="w-4 h-4" />
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     </div>
+
+                    {statusMessage && (
+                        <div className="text-blue-500 text-xs bg-blue-500/10 border border-blue-500/20 p-2 rounded-lg flex items-center gap-2 justify-center">
+                            <Loader2 className="w-3 h-3 animate-spin" /> {statusMessage}
+                        </div>
+                    )}
 
                     {error && (
                         <p className="text-xs text-red-500 bg-red-500/10 border border-red-500/20 p-2 rounded-lg">
@@ -86,22 +121,15 @@ export function AddCourseDialog({ children }: { children?: React.ReactNode }) {
                         <Button
                             type="button"
                             variant="ghost"
-                            onClick={() => setOpen(false)}
+                            onClick={() => {
+                                setOpen(false);
+                                setStatusMessage("");
+                                setIsSuccess(false);
+                                setUrl("");
+                            }}
                             className="text-muted-foreground hover:text-foreground"
                         >
                             Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isLoading || !url}
-                            className="bg-primary hover:opacity-90 transition-opacity"
-                        >
-                            {isLoading ? (
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                            ) : (
-                                <ArrowRight className="w-4 h-4 mr-2" />
-                            )}
-                            Create Course
                         </Button>
                     </div>
                 </form>

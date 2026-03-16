@@ -3,12 +3,7 @@ import Footer from "@/components/ui/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import "./globals.css";
-import { Inter } from "next/font/google";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+// Standard system font stack will be used via Tailwind sans class
 
 export const metadata = {
   title: "CoursifyYT - Learn. Track. Master.",
@@ -22,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
+      <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             <div className="flex min-h-screen flex-col">
