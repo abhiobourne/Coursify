@@ -74,7 +74,7 @@ export default function SharedCoursePlayer() {
     }
 
     if (!course || !activeVideo) {
-        return <div className="p-8 text-center text-zinc-400">Course not found or is private.</div>;
+        return <div className="p-8 text-center text-muted-foreground">Course not found or is private.</div>;
     }
 
     const progressPercent = course.totalDuration > 0
@@ -85,9 +85,9 @@ export default function SharedCoursePlayer() {
         <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-4rem)] overflow-hidden bg-background">
 
             {/* Mobile Sidebar Toggle */}
-            <div className="md:hidden bg-zinc-900 border-b border-border p-4 flex items-center justify-between">
+            <div className="md:hidden bg-card border-b border-border p-4 flex items-center justify-between">
                 <span className="font-semibold text-foreground truncate pr-4">{course.title}</span>
-                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 bg-white/5 rounded-lg text-foreground">
+                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 bg-muted rounded-lg text-foreground">
                     {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
             </div>
@@ -108,14 +108,14 @@ export default function SharedCoursePlayer() {
                         <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                             <Share2 className="w-3 h-3" /> Read Only
                         </span>
-                        <Link href="/" className="text-sm bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors border border-white/10">
+                        <Link href="/" className="text-sm bg-primary hover:opacity-90 text-primary-foreground px-4 py-2 rounded-lg transition-colors shadow-sm">
                             Get CoursifyYT
                         </Link>
                     </div>
                 </div>
 
                 {/* Video Player Header */}
-                <div className="p-4 md:px-8 bg-zinc-900/30">
+                <div className="p-4 md:px-8 bg-muted/30">
                     <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4 line-clamp-2">
                         {activeVideo.title}
                     </h1>
@@ -142,7 +142,7 @@ export default function SharedCoursePlayer() {
                         <h2 className="text-xl font-semibold text-foreground mb-4">Shared Notes</h2>
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-indigo-500/20 rounded-2xl blur opacity-30" />
-                            <div className="relative w-full p-6 bg-zinc-900 border border-white/10 rounded-2xl text-zinc-300 leading-relaxed text-sm tiptap-editor"
+                            <div className="relative w-full p-6 bg-card border border-border rounded-2xl text-foreground leading-relaxed text-sm tiptap-editor"
                                 dangerouslySetInnerHTML={{ __html: note }}
                             />
                         </div>
@@ -152,7 +152,7 @@ export default function SharedCoursePlayer() {
 
             {/* Playlist Sidebar */}
             <div className={cn(
-                "w-full md:w-[400px] bg-zinc-900/50 border-l border-border flex flex-col h-full",
+                "w-full md:w-[400px] bg-card border-l border-border flex flex-col h-full",
                 sidebarOpen ? "block" : "hidden md:flex"
             )}>
                 <div className="p-6 border-b border-border shrink-0 glass z-10 flex flex-col gap-4">
@@ -174,7 +174,7 @@ export default function SharedCoursePlayer() {
                                 }}
                                 className={cn(
                                     "w-full text-left p-3 rounded-xl flex items-start gap-4 transition-all duration-300 group",
-                                    isActive ? "bg-primary/20 border border-primary/30" : "hover:bg-white/5 border border-transparent"
+                                    isActive ? "bg-primary/10 border border-primary/20" : "hover:bg-accent border border-transparent"
                                 )}
                             >
                                 <div className="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-zinc-800">
@@ -190,12 +190,12 @@ export default function SharedCoursePlayer() {
                                 <div className="flex-1 min-w-0 pr-2">
                                     <p className={cn(
                                         "text-sm font-medium mb-1 line-clamp-2 leading-tight",
-                                        isActive ? "text-white" : "text-zinc-300 group-hover:text-white"
+                                        isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
                                     )}>
-                                        <span className="text-zinc-500 mr-2">{idx + 1}.</span>
+                                        <span className="text-muted-foreground mr-2">{idx + 1}.</span>
                                         {video.title}
                                     </p>
-                                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                         <span className="flex items-center gap-1">
                                             {video.isCompleted ? (
                                                 <CheckCircle className="w-3 h-3 text-green-400" />

@@ -26,16 +26,16 @@ export function ProgressBar({
         <div className={cn("w-full flex flex-col gap-2", className)}>
             {showLabel && (
                 <div className="flex justify-between items-center text-xs font-medium">
-                    <span className="text-zinc-400">Progress</span>
+                    <span className="text-muted-foreground">Progress</span>
                     <span className={cn(
                         "text-right",
-                        clampedProgress === 100 ? "text-green-400" : "text-white"
+                        clampedProgress === 100 ? "text-green-500" : "text-foreground"
                     )}>
                         {Math.round(clampedProgress)}%
                     </span>
                 </div>
             )}
-            <div className={cn("w-full bg-zinc-800 rounded-full overflow-hidden", hSize)}>
+            <div className={cn("w-full bg-muted rounded-full overflow-hidden border border-border/50", hSize)}>
                 <div
                     className={cn(
                         "h-full rounded-full transition-all duration-1000 ease-out",

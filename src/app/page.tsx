@@ -38,7 +38,7 @@ export default function Home() {
       <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-[128px] -z-10 mix-blend-screen pointer-events-none" />
 
       <div className="max-w-4xl w-full text-center space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-zinc-300 mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border text-sm font-medium text-muted-foreground mb-4 shadow-sm">
           <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
           Turn passive watching into active learning
         </div>
@@ -50,7 +50,7 @@ export default function Home() {
           </span>
         </h1>
 
-        <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           Paste any YouTube video or playlist URL and instantly generate a structured, trackable course with built-in notes and progress saving.
         </p>
 
@@ -59,20 +59,19 @@ export default function Home() {
             <div className="flex flex-col items-center gap-4">
               <button
                 onClick={signInWithGoogle}
-                className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-white text-zinc-900 font-bold text-lg hover:scale-105 transition-all duration-300 overflow-hidden shadow-[0_0_40px_rgba(255,255,255,0.3)]"
+                className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary text-primary-foreground font-bold text-lg hover:opacity-90 transition-all duration-300 overflow-hidden shadow-xl"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                 Get Started for Free
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <p className="text-sm text-zinc-500">No credit card required. Sign in with Google.</p>
+              <p className="text-sm text-muted-foreground">No credit card required. Sign in with Google.</p>
             </div>
           ) : (
             <form onSubmit={handleCreateCourse} className="flex flex-col gap-4">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-indigo-500 rounded-2xl blur-xl opacity-20 group-focus-within:opacity-50 transition-opacity duration-500" />
-                <div className="relative flex items-center bg-zinc-900/80 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl focus-within:border-primary/50 transition-colors">
-                  <div className="pl-4 pr-2 text-zinc-500">
+                <div className="relative flex items-center bg-card border border-border rounded-2xl overflow-hidden focus-within:border-primary/50 transition-colors shadow-sm">
+                  <div className="pl-4 pr-2 text-muted-foreground">
                     <ListVideo className="w-5 h-5" />
                   </div>
                   <input
@@ -81,7 +80,7 @@ export default function Home() {
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="Paste YouTube Playlist or Video URL..."
                     required
-                    className="flex-1 bg-transparent border-none outline-none py-4 px-2 text-white placeholder:text-zinc-600 w-full"
+                    className="flex-1 bg-transparent border-none outline-none py-4 px-2 text-foreground placeholder:text-muted-foreground w-full"
                   />
                   <div className="pr-2">
                     <button
@@ -127,11 +126,11 @@ export default function Home() {
             }
           ].map((feature, i) => (
             <div key={i} className="glass-card p-6 rounded-2xl">
-              <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4 border border-border">
                 {feature.icon}
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">{feature.desc}</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>
