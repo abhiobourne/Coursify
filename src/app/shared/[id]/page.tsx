@@ -99,7 +99,7 @@ export default function SharedCoursePlayer() {
             )}>
 
                 {/* Breadcrumb & Navigation */}
-                <div className="p-4 md:px-8 border-b border-white/5 flex items-center justify-between">
+                <div className="p-4 md:px-8 border-b border-border flex items-center justify-between">
                     <div className="flex items-center gap-4 text-sm font-medium">
                         <span className="text-muted-foreground">Shared Course /</span>
                         <span className="text-foreground truncate max-w-[200px] md:max-w-md">{course.title}</span>
@@ -121,7 +121,7 @@ export default function SharedCoursePlayer() {
                     </h1>
 
                     {/* YouTube Embed */}
-                    <div className="aspect-video w-full max-w-5xl mx-auto bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                    <div className="aspect-video w-full max-w-5xl mx-auto bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border">
                         <YouTube
                             videoId={activeVideo.id}
                             opts={{
@@ -141,7 +141,7 @@ export default function SharedCoursePlayer() {
                     <div className="flex-1 p-4 md:px-8 max-w-5xl mx-auto w-full pb-12">
                         <h2 className="text-xl font-semibold text-foreground mb-4">Shared Notes</h2>
                         <div className="relative group">
-                            <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-indigo-500/20 rounded-2xl blur opacity-30" />
+                            <div className="absolute -inset-1 bg-gradient-to-br from-primary/10 to-indigo-500/10 rounded-2xl blur opacity-30" />
                             <div className="relative w-full p-6 bg-card border border-border rounded-2xl text-foreground leading-relaxed text-sm tiptap-editor"
                                 dangerouslySetInnerHTML={{ __html: note }}
                             />
@@ -155,7 +155,7 @@ export default function SharedCoursePlayer() {
                 "w-full md:w-[400px] bg-card border-l border-border flex flex-col h-full",
                 sidebarOpen ? "block" : "hidden md:flex"
             )}>
-                <div className="p-6 border-b border-border shrink-0 glass z-10 flex flex-col gap-4">
+                <div className="p-6 border-b border-border shrink-0 bg-card z-10 flex flex-col gap-4">
                     <div>
                         <h2 className="text-lg font-bold text-foreground mb-4 line-clamp-1">{course.title}</h2>
                         <ProgressBar progress={progressPercent} size="md" />
@@ -177,7 +177,7 @@ export default function SharedCoursePlayer() {
                                     isActive ? "bg-primary/10 border border-primary/20" : "hover:bg-accent border border-transparent"
                                 )}
                             >
-                                <div className="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-zinc-800">
+                                <div className="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-muted">
                                     <img src={video.thumbnailUrl} alt="" className={cn(
                                         "w-full h-full object-cover transition-transform duration-500",
                                         !isActive && "group-hover:scale-110"

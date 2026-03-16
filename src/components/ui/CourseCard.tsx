@@ -4,6 +4,17 @@ import { ProgressBar } from "./ProgressBar";
 import { Play, Trash2, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CourseCardProps {
     course: Course;
@@ -77,7 +88,7 @@ export function CourseCard({ course, onDelete }: CourseCardProps) {
                         ))}
                         <button
                             onClick={handleAddTag}
-                            className="bg-muted hover:bg-zinc-200 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground text-xs px-2 py-1 rounded-md flex items-center gap-1 transition-colors border border-border"
+                            className="bg-muted hover:bg-accent text-muted-foreground hover:text-foreground text-xs px-2 py-1 rounded-md flex items-center gap-1 transition-colors border border-border"
                         >
                             <Tag className="w-3 h-3" />
                             Add
@@ -92,17 +103,38 @@ export function CourseCard({ course, onDelete }: CourseCardProps) {
                             />
                         </div>
                         {onDelete && (
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    onDelete(course.id);
-                                }}
-                                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors z-30"
-                                title="Delete Course"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <button
+                                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors z-30"
+                                        title="Delete Course"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the course "{course.title}" and all its associated progress.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                onDelete(course.id);
+                                            }}
+                                            className="bg-red-500 hover:bg-red-600 text-white"
+                                        >
+                                            Delete
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         )}
                     </div>
                 </div>

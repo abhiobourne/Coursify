@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState, useRef } from "react";
 import { getCourse, getCourseVideos, toggleVideoCompletion, saveVideoNote, getVideoNote, toggleVideoFavorite, Course, CourseVideo } from "@/lib/courses";
 import YouTube from "react-youtube";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle, Circle, PlayCircle, Loader2, Save, ChevronLeft, ChevronRight, Menu, X, Star, Search, Share2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -196,14 +197,43 @@ export default function CoursePlayer() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex-1 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-4rem)] overflow-hidden">
+                <div className="flex-1 flex flex-col">
+                    <div className="p-8 border-b border-border space-y-4">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-8 w-3/4" />
+                    </div>
+                    <div className="p-8 space-y-8 flex-1">
+                        <Skeleton className="aspect-video w-full max-w-5xl rounded-2xl mx-auto" />
+                        <div className="max-w-5xl mx-auto space-y-4">
+                            <Skeleton className="h-8 w-32" />
+                            <Skeleton className="h-64 w-full rounded-2xl" />
+                        </div>
+                    </div>
+                </div>
+                <div className="w-[400px] border-l border-border p-6 space-y-6 hidden md:block">
+                    <div className="space-y-4">
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-4 w-full" />
+                    </div>
+                    <div className="space-y-4">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className="flex gap-4">
+                                <Skeleton className="w-24 aspect-video rounded-lg" />
+                                <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-3 w-1/2" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
 
     if (!course || !activeVideo) {
-        return <div className="p-8 text-center text-zinc-400">Course not found.</div>;
+        return <div className="p-8 text-center text-muted-foreground">Course not found.</div>;
     }
 
     const progressPercent = course.totalDuration > 0
@@ -214,9 +244,9 @@ export default function CoursePlayer() {
         <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-4rem)] overflow-hidden">
 
             {/* Mobile Sidebar Toggle */}
-            <div className="md:hidden bg-zinc-900 border-b border-white/10 p-4 flex items-center justify-between">
-                <span className="font-semibold text-white truncate pr-4">{course.title}</span>
-                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 bg-white/5 rounded-lg text-white">
+            <div className="md:hidden bg-card border-b border-border p-4 flex items-center justify-between">
+                <span className="font-semibold text-foreground truncate pr-4">{course.title}</span>
+                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 bg-muted rounded-lg text-foreground">
                     {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
             </div>
@@ -228,19 +258,19 @@ export default function CoursePlayer() {
             )}>
 
                 {/* Breadcrumb & Navigation */}
-                <div className="p-4 md:px-8 border-b border-white/5 flex items-center justify-between">
+                <div className="p-4 md:px-8 border-b border-border flex items-center justify-between">
                     <div className="flex items-center gap-4 text-sm font-medium">
-                        <Link href="/dashboard" className="text-zinc-500 hover:text-white transition-colors flex items-center gap-1">
+                        <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                             <ChevronLeft className="w-4 h-4" />
                             Dashboard
                         </Link>
-                        <span className="text-zinc-700">/</span>
-                        <span className="text-white truncate max-w-[200px] md:max-w-md">{course.title}</span>
+                        <span className="text-border">/</span>
+                        <span className="text-foreground truncate max-w-[200px] md:max-w-md">{course.title}</span>
                     </div>
 
                     <button
                         onClick={handleCopyShareLink}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-zinc-300 hover:text-white hover:border-white/20 transition-all text-sm font-medium group"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all text-sm font-medium group shadow-sm"
                     >
                         {copiedShareLink ? <CheckCircle className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4 group-hover:text-primary transition-colors" />}
                         {copiedShareLink ? "Copied!" : "Share Progress"}
@@ -248,13 +278,13 @@ export default function CoursePlayer() {
                 </div>
 
                 {/* Video Player Header */}
-                <div className="p-4 md:px-8 bg-zinc-900/30">
-                    <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 line-clamp-2">
+                <div className="p-4 md:px-8 bg-muted/30">
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4 line-clamp-2">
                         {activeVideo.title}
                     </h1>
 
                     {/* YouTube Embed */}
-                    <div className="aspect-video w-full max-w-5xl mx-auto bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                    <div className="aspect-video w-full max-w-5xl mx-auto bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border">
                         <YouTube
                             videoId={activeVideo.id}
                             opts={{
@@ -292,7 +322,7 @@ export default function CoursePlayer() {
                                     "flex items-center justify-center p-3 rounded-xl border transition-all duration-300",
                                     activeVideo.isFavorite
                                         ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20"
-                                        : "bg-zinc-900 border-white/10 text-zinc-400 hover:text-white hover:border-white/20"
+                                        : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/50"
                                 )}
                                 title={activeVideo.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                             >
@@ -305,10 +335,10 @@ export default function CoursePlayer() {
                 {/* Notes Section */}
                 <div className="flex-1 p-4 md:px-8 max-w-5xl mx-auto w-full pb-12">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-white">My Notes</h2>
+                        <h2 className="text-xl font-semibold text-foreground">My Notes</h2>
                         <div className="flex items-center gap-2 text-xs font-medium">
                             {savingNote && (
-                                <span className="text-zinc-400 flex items-center gap-1">
+                                <span className="text-muted-foreground flex items-center gap-1">
                                     <Loader2 className="w-3 h-3 animate-spin" /> Saving...
                                 </span>
                             )}

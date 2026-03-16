@@ -19,7 +19,7 @@ export default function Navbar() {
     const { user, signInWithGoogle, logOut } = useAuth();
 
     return (
-        <nav className="sticky top-0 z-50 w-full border-b border-border glass">
+        <nav className="sticky top-0 z-50 w-full border-b border-border bg-background">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
                     <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
@@ -37,7 +37,7 @@ export default function Navbar() {
                                 href="/dashboard"
                                 className={cn(
                                     "hidden sm:flex items-center gap-2 px-4 py-2 rounded-full",
-                                    "text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
+                                    "text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
                                 )}
                             >
                                 <LayoutDashboard className="w-4 h-4" />
@@ -49,7 +49,7 @@ export default function Navbar() {
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center gap-2 p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 transition-all outline-none group">
+                                    <button className="flex items-center gap-2 p-1 rounded-full hover:bg-accent transition-all outline-none group">
                                         {user.photoURL ? (
                                             <img
                                                 src={user.photoURL}
@@ -69,7 +69,7 @@ export default function Navbar() {
                                         </div>
                                     </button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-56 mt-2 glass-card">
+                                <DropdownMenuContent align="end" className="w-56 mt-2">
                                     <DropdownMenuLabel className="font-normal">
                                         <div className="flex flex-col space-y-1">
                                             <p className="text-sm font-medium leading-none text-foreground">{user.displayName}</p>

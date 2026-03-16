@@ -7,7 +7,8 @@ import { CourseCard } from "@/components/ui/CourseCard";
 import { FavoriteVideoCard } from "@/components/ui/FavoriteVideoCard";
 import { AddCourseDialog } from "@/components/ui/AddCourseDialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -47,10 +48,6 @@ export default function Dashboard() {
     }, [user, authLoading, router]);
 
     const handleDeleteCourse = async (courseId: string) => {
-        if (!confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
-            return;
-        }
-
         try {
             await deleteCourse(courseId);
             setCourses(prev => prev.filter(c => c.id !== courseId));
@@ -62,8 +59,32 @@ export default function Dashboard() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex-1 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <div className="container mx-auto px-4 py-8 space-y-8">
+                <div className="flex justify-between items-end gap-4">
+                    <div className="space-y-2">
+                        <Skeleton className="h-8 w-48" />
+                        <Skeleton className="h-4 w-64" />
+                    </div>
+                    <div className="flex gap-4">
+                        <Skeleton className="h-10 w-64" />
+                        <Skeleton className="h-10 w-32" />
+                    </div>
+                </div>
+                <div className="flex gap-4 border-b border-border pb-px">
+                    <Skeleton className="h-10 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <div key={i} className="space-y-4">
+                            <Skeleton className="aspect-video w-full rounded-2xl" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-6 w-3/4" />
+                                <Skeleton className="h-4 w-1/2" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }

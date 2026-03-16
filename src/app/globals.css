@@ -100,6 +100,7 @@
   body {
     @apply min-h-screen antialiased selection:bg-primary/30 bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
@@ -107,11 +108,11 @@
 
 @layer utilities {
   .glass {
-    @apply bg-background/60 backdrop-blur-xl border border-border shadow-2xl;
+    @apply bg-background border border-border shadow-md;
   }
 
   .glass-card {
-    @apply bg-card/50 backdrop-blur-md border border-border shadow-xl hover:border-primary/50 transition-all duration-300;
+    @apply bg-card border border-border shadow-sm hover:border-primary/50 transition-all duration-300;
   }
 
   .text-glow {
