@@ -16,7 +16,7 @@ export function FavoriteVideoCard({ video }: FavoriteVideoCardProps) {
     };
 
     return (
-        <Link href={`/course/${video.courseId}`} className="group block h-full">
+        <Link href={`/course/${video.courseId}?v=${video.videoId}&s=${video.startTime || 0}`} className="group block h-full">
             <div className="glass-card rounded-2xl overflow-hidden h-full flex flex-col relative group-hover:-translate-y-1 transition-transform duration-300">
 
                 {/* Thumbnail Container */}

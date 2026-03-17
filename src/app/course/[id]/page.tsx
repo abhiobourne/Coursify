@@ -35,8 +35,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
 }
 
-export default async function CoursePage({ params }: Props) {
+export default async function CoursePage({ params, searchParams }: {
+    params: Promise<{ id: string }>,
+    searchParams: Promise<{ v?: string, s?: string }>
+}) {
     const { id } = await params;
+    const { v: initialVideoId, s: initialStartTimeStr } = await searchParams;
+    const initialStartTime = initialStartTimeStr ? parseInt(initialStartTimeStr) : undefined;
+
     const courseData = await getCourse(id);
 
     if (!courseData) {
@@ -63,6 +69,8 @@ export default async function CoursePage({ params }: Props) {
         <CoursePlayerClient
             course={course}
             initialVideos={videos}
+            initialVideoId={initialVideoId}
+            initialStartTime={initialStartTime}
         />
     );
 }

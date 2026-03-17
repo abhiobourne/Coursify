@@ -19,101 +19,113 @@ export default function Navbar() {
     const { user, signInWithGoogle, logOut } = useAuth();
 
     return (
-        <nav className="sticky top-0 z-50 w-full border-b border-border bg-background">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                        <PlaySquare className="w-5 h-5 text-primary-foreground" />
-                    </div>
-                    <span className="font-bold text-xl tracking-tight text-foreground">
-                        Coursify<span className="text-primary">YT</span>
-                    </span>
-                </Link>
+        <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-between gap-8 px-6 py-3 rounded-full bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-lg dark:shadow-2xl w-[90%] max-w-5xl transition-all duration-300">
+            <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+                <PlaySquare className="w-5 h-5 text-primary dark:text-white" />
+                <span className="font-bold text-lg tracking-tight text-foreground dark:text-white">
+                    Coursify<span className="text-blue-400">YT</span>
+                </span>
+            </Link>
 
-                <div className="flex items-center gap-4">
-                    {user ? (
-                        <>
-                            <Link
-                                href="/dashboard"
-                                className={cn(
-                                    "hidden sm:flex items-center gap-2 px-4 py-2 rounded-full",
-                                    "text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
-                                )}
+            <div className="hidden md:flex items-center gap-6">
+                <Link href="/#features" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Features</Link>
+                <Link href="/#testimonials" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Stories</Link>
+                <Link href="/#pricing" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Pricing</Link>
+            </div>
+
+            <div className="flex items-center gap-3">
+                <ThemeToggle />
+                {user ? (
+                    <>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="flex items-center justify-center w-10 h-10 rounded-full bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 transition-all outline-none border border-black/5 dark:border-white/5 group">
+                                    {user.photoURL ? (
+                                        <img
+                                            src={user.photoURL}
+                                            alt={user.displayName || "User"}
+                                            className="w-full h-full rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <User className="w-5 h-5 text-black dark:text-white" />
+                                    )}
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                align="end"
+                                className="w-64 mt-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 text-foreground shadow-2xl rounded-3xl p-2 animate-in fade-in zoom-in-95 duration-200"
                             >
-                                <LayoutDashboard className="w-4 h-4" />
-                                Dashboard
-                            </Link>
-
-                            <ThemeToggle />
-                            <div className="h-6 w-px bg-border hidden sm:block mx-1"></div>
-
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center gap-2 p-1 rounded-full hover:bg-accent transition-all outline-none group">
-                                        {user.photoURL ? (
-                                            <img
-                                                src={user.photoURL}
-                                                alt={user.displayName || "User"}
-                                                className="w-8 h-8 rounded-full ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
-                                            />
-                                        ) : (
-                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <User className="w-4 h-4 text-primary" />
+                                <DropdownMenuLabel className="font-normal px-4 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full border border-primary/20 p-0.5">
+                                            {user.photoURL ? (
+                                                <img
+                                                    src={user.photoURL}
+                                                    alt={user.displayName || "User"}
+                                                    className="w-full h-full rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                    <User className="w-5 h-5" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col space-y-0.5 overflow-hidden">
+                                            <p className="text-sm font-bold truncate leading-none">{user.displayName}</p>
+                                            <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+                                        </div>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator className="bg-black/5 dark:bg-white/10 mx-2" />
+                                <div className="p-1 space-y-1">
+                                    <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-xl cursor-pointer py-2.5 px-3 transition-colors text-foreground dark:text-white">
+                                        <Link href="/profile" className="flex items-center w-full">
+                                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center mr-3 group-focus:bg-primary/20">
+                                                <User className="h-4 w-4" />
                                             </div>
-                                        )}
-                                        <div className="hidden sm:flex items-center gap-1 ml-1">
-                                            <span className="text-sm font-medium text-foreground truncate max-w-[120px]">
-                                                {user.displayName?.split(' ')[0]}
-                                            </span>
-                                            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                                        </div>
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-56 mt-2">
-                                    <DropdownMenuLabel className="font-normal">
-                                        <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-medium leading-none text-foreground">{user.displayName}</p>
-                                            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                                        </div>
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator className="bg-border" />
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/dashboard" className="cursor-pointer flex items-center">
-                                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                                            <span>Dashboard</span>
+                                            <span className="font-semibold text-sm">Profile</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/dashboard/stats" className="cursor-pointer flex items-center">
-                                            <LineChart className="mr-2 h-4 w-4" />
-                                            <span>Learning Stats</span>
+                                    <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-xl cursor-pointer py-2.5 px-3 transition-colors text-foreground dark:text-white">
+                                        <Link href="/dashboard" className="flex items-center w-full">
+                                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center mr-3 group-focus:bg-primary/20">
+                                                <LayoutDashboard className="h-4 w-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm">Dashboard</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuSeparator className="bg-border" />
-                                    <DropdownMenuItem onClick={logOut} className="cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10">
-                                        <LogOut className="mr-2 h-4 w-4" />
-                                        <span>Log out</span>
+                                    <DropdownMenuItem asChild className="focus:bg-zinc-500/10 rounded-xl cursor-pointer py-2.5 px-3 transition-colors text-foreground dark:text-white">
+                                        <Link href="/settings" className="flex items-center w-full">
+                                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center mr-3">
+                                                <Settings className="h-4 w-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm">Settings</span>
+                                        </Link>
                                     </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </>
-                    ) : (
-                        <div className="flex items-center gap-4">
-                            <ThemeToggle />
-                            <button
-                                onClick={signInWithGoogle}
-                                className={cn(
-                                    "flex items-center gap-2 px-5 py-2.5 rounded-full",
-                                    "bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90",
-                                    "transition-all duration-300 shadow-lg"
-                                )}
-                            >
-                                <LogIn className="w-4 h-4" />
-                                Sign in with Google
-                            </button>
-                        </div>
-                    )}
-                </div>
+                                </div>
+                                <DropdownMenuSeparator className="bg-black/5 dark:bg-white/10 mx-2" />
+                                <div className="p-1">
+                                    <DropdownMenuItem
+                                        onClick={logOut}
+                                        className="cursor-pointer text-red-500 dark:text-red-400 focus:text-red-600 dark:focus:text-red-300 focus:bg-red-500/10 rounded-xl py-2.5 px-3 w-full transition-colors"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center mr-3">
+                                            <LogOut className="h-4 w-4" />
+                                        </div>
+                                        <span className="font-bold text-sm">Sign Out</span>
+                                    </DropdownMenuItem>
+                                </div>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </>
+                ) : (
+                    <button
+                        onClick={signInWithGoogle}
+                        className="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium text-white dark:text-black bg-primary dark:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                    >
+                        Sign in
+                    </button>
+                )}
             </div>
         </nav>
     );

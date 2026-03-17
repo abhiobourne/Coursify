@@ -3,7 +3,50 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Bold, Italic, List, ListOrdered, Heading2, Quote, Clock } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+
+// Custom Extension for # and ## comments
+import { InputRule, markInputRule, Mark, mergeAttributes } from '@tiptap/core';
+
+// Green Text Comment (# comment)
+const InlineComment = Mark.create({
+    name: 'inlineComment',
+    addOptions() {
+        return { HTMLAttributes: { class: 'text-green-500 italic' } }
+    },
+    parseHTML() { return [{ tag: 'span.inline-comment' }] },
+    renderHTML({ HTMLAttributes }) {
+        return ['span', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { class: 'inline-comment text-green-500 italic' }), 0]
+    },
+    addInputRules() {
+        return [
+            markInputRule({
+                find: /(?:^|\s)#\s([^#]+)#$/,
+                type: this.type,
+            }),
+        ]
+    },
+});
+
+// Bold Yellow Comment (## comment)
+const BoldComment = Mark.create({
+    name: 'boldComment',
+    addOptions() {
+        return { HTMLAttributes: { class: 'text-yellow-500 font-bold' } }
+    },
+    parseHTML() { return [{ tag: 'span.bold-comment' }] },
+    renderHTML({ HTMLAttributes }) {
+        return ['span', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { class: 'bold-comment text-yellow-500 font-bold' }), 0]
+    },
+    addInputRules() {
+        return [
+            markInputRule({
+                find: /(?:^|\s)##\s([^#]+)##$/,
+                type: this.type,
+            }),
+        ]
+    },
+});
 
 interface RichTextEditorProps {
     content: string;
@@ -14,7 +57,11 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ content, onChange, onCaptureTimestamp, editorRef }: RichTextEditorProps) {
     const editor = useEditor({
-        extensions: [StarterKit],
+        extensions: [
+            StarterKit,
+            InlineComment,
+            BoldComment
+        ],
         content,
         immediatelyRender: false,
         onUpdate: ({ editor }) => {
@@ -22,7 +69,7 @@ export function RichTextEditor({ content, onChange, onCaptureTimestamp, editorRe
         },
         editorProps: {
             attributes: {
-                class: 'tiptap-editor focus:outline-none min-h-[300px] p-6 text-foreground',
+                class: 'tiptap-editor focus:outline-none min-h-[300px] p-6 text-foreground prose prose-sm dark:prose-invert max-w-none',
             },
         },
     });
@@ -107,8 +154,8 @@ export function RichTextEditor({ content, onChange, onCaptureTimestamp, editorRe
                 )}
             </div>
 
-            <div className="flex-1 overflow-y-auto cursor-text text-base leading-relaxed" onClick={() => editor.chain().focus().run()}>
-                <EditorContent editor={editor} className="h-full" />
+            <div className="flex-1 overflow-y-auto overflow-x-hidden cursor-text text-base leading-relaxed" onClick={() => editor.chain().focus().run()}>
+                <EditorContent editor={editor} className="h-full max-w-full break-words [&_.ProseMirror]:min-h-full" />
             </div>
         </div>
     );

@@ -10,24 +10,35 @@ import { cn } from "@/lib/utils";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Props {
     course: Course;
     initialVideos: CourseVideo[];
+    initialVideoId?: string;
+    initialStartTime?: number;
 }
 
-export default function CoursePlayerClient({ course: initialCourse, initialVideos }: Props) {
+export default function CoursePlayerClient({
+    course: initialCourse,
+    initialVideos,
+    initialVideoId,
+    initialStartTime
+}: Props) {
     const { user } = useAuth();
 
     const [course, setCourse] = useState<Course>(initialCourse);
     const [videos, setVideos] = useState<CourseVideo[]>(initialVideos);
     const [activeVideo, setActiveVideo] = useState<CourseVideo>(() => {
+        if (initialVideoId) {
+            const found = initialVideos.find(v => v.id === initialVideoId && (initialStartTime === undefined || (v.startTime || 0) === initialStartTime));
+            if (found) return found;
+        }
         return initialVideos.find(vid => !vid.isCompleted) || initialVideos[0];
     });
 
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [sidebarSearchQuery, setSidebarSearchQuery] = useState("");
-    const [copiedShareLink, setCopiedShareLink] = useState(false);
     const [togglingCompletion, setTogglingCompletion] = useState<string | null>(null);
 
     const [note, setNote] = useState("");
@@ -112,6 +123,7 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
 
     const handleNoteChange = (value: string) => {
         setNote(value);
+        // Only show saving indicator, not the "saved" flash yet
         setNoteSaved(false);
 
         if (noteTimeoutRef.current) clearTimeout(noteTimeoutRef.current);
@@ -119,11 +131,16 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
         noteTimeoutRef.current = setTimeout(async () => {
             if (!user || !activeVideo) return;
             setSavingNote(true);
-            await saveVideoNote(user.uid, course.id, activeVideo.id, value, activeVideo.startTime || 0);
-            setSavingNote(false);
-            setNoteSaved(true);
-            setTimeout(() => setNoteSaved(false), 2000);
-        }, 1000);
+            try {
+                await saveVideoNote(user.uid, course.id, activeVideo.id, value, activeVideo.startTime || 0);
+                setNoteSaved(true);
+                // Keep the "Saved" indicator visible for a bit longer but don't flash it every 3s if typing
+            } catch (err) {
+                console.error("Failed to save note", err);
+            } finally {
+                setSavingNote(false);
+            }
+        }, 5000); // Increased to 5s to be less "flickery"
     };
 
     const handleCaptureTimestamp = () => {
@@ -154,8 +171,7 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
     const handleCopyShareLink = () => {
         const link = `${window.location.origin}/shared/${course.id}`;
         navigator.clipboard.writeText(link);
-        setCopiedShareLink(true);
-        setTimeout(() => setCopiedShareLink(false), 2000);
+        toast.success("Share link copied to clipboard!");
     };
 
     const toggleFavorite = async (video: CourseVideo) => {
@@ -207,8 +223,8 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
                 localStorage.setItem(`course_progress_${activeVideo.id}_${activeVideo.startTime || 0}`, currentTime.toString());
 
                 heartbeatSecondsRef.current += 1;
-                if (heartbeatSecondsRef.current >= 60) {
-                    recordStudyTime(user.uid, 60);
+                if (heartbeatSecondsRef.current >= 10) {
+                    recordStudyTime(user.uid, 10);
                     heartbeatSecondsRef.current = 0;
                 }
 
@@ -248,6 +264,35 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
         }
         fetchNote();
     }, [activeVideo?.id, activeVideo?.startTime, user]);
+
+    // Sync global favorites state on mount to ensure consistency
+    useEffect(() => {
+        let mounted = true;
+        async function syncFavorites() {
+            if (!user || !course) return;
+            try {
+                const { getFavoriteVideos } = await import('@/lib/courses');
+                const favs = await getFavoriteVideos(user.uid);
+                if (!mounted) return;
+
+                const favIds = new Set(favs.map(f => `${f.courseId}_${f.videoId}_${f.startTime || 0}`));
+
+                setVideos(prev => prev.map(v => {
+                    const isFav = favIds.has(`${course.id}_${v.id}_${v.startTime || 0}`);
+                    return v.isFavorite !== isFav ? { ...v, isFavorite: isFav } : v;
+                }));
+
+                setActiveVideo(prev => {
+                    const isFav = favIds.has(`${course.id}_${prev.id}_${prev.startTime || 0}`);
+                    return prev.isFavorite !== isFav ? { ...prev, isFavorite: isFav } : prev;
+                });
+            } catch (err) {
+                console.error("Failed to sync favorites", err);
+            }
+        }
+        syncFavorites();
+        return () => { mounted = false; };
+    }, [user, course?.id, activeVideo.id, activeVideo.startTime]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -322,8 +367,8 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
                             onClick={handleCopyShareLink}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all text-sm font-medium group shadow-sm"
                         >
-                            {copiedShareLink ? <CheckCircle className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4 group-hover:text-primary transition-colors" />}
-                            {copiedShareLink ? "Copied!" : "Share Progress"}
+                            <Share2 className="w-4 h-4 group-hover:text-primary transition-colors" />
+                            Share Progress
                         </button>
                     </nav>
                 )}
@@ -437,7 +482,14 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
                 )}>
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex flex-col gap-1">
-                            <h2 className="text-xl font-bold text-foreground">My Study Notes</h2>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-xl font-bold text-foreground">My Study Notes</h2>
+                                {course.instructorName && (
+                                    <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                        by {course.instructorName}
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-xs text-muted-foreground">Capture thoughts and timestamps for this lesson.</p>
                         </div>
                         <div className="flex items-center gap-2 text-xs font-medium">
@@ -445,9 +497,9 @@ export default function CoursePlayerClient({ course: initialCourse, initialVideo
                             {noteSaved && <span className="text-green-400 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Saved to cloud</span>}
                         </div>
                     </div>
-                    <div className="relative group min-h-[400px] h-full">
+                    <div className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-br from-primary/10 to-indigo-500/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000" />
-                        <div className="relative h-full">
+                        <div className="relative">
                             <RichTextEditor
                                 content={note}
                                 onChange={handleNoteChange}

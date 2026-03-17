@@ -1,57 +1,64 @@
-import Link from "next/link";
-import { PlaySquare, Github, Twitter, Mail } from "lucide-react";
+"use client";
 
-export default function Footer() {
+import Link from "next/link";
+import { PlaySquare, Twitter, Github, Linkedin, Youtube, Heart } from "lucide-react";
+
+export function Footer() {
     return (
-        <footer className="border-t border-border bg-background mt-auto">
-            <div className="container mx-auto px-4 py-8 md:py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div className="md:col-span-2 space-y-4">
+        <footer className="py-20 border-t border-border bg-card/30 backdrop-blur-sm">
+            <div className="container mx-auto px-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                    <div className="col-span-1 md:col-span-2 space-y-6">
                         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-                            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-                                <PlaySquare className="w-3.5 h-3.5 text-primary-foreground" />
-                            </div>
-                            <span className="font-bold text-lg tracking-tight text-foreground">
+                            <PlaySquare className="w-6 h-6 text-primary" />
+                            <span className="font-bold text-xl tracking-tight text-foreground">
                                 Coursify<span className="text-primary">YT</span>
                             </span>
                         </Link>
-                        <p className="text-muted-foreground text-sm max-w-sm">
-                            Transform YouTube playlists into structured learning courses with
-                            progress tracking, rich formatting notes, bookmarks, and a distraction-free experience.
+                        <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
+                            The ultimate learning companion for YouTube. Transform any video into a structured learning experience with AI-powered notes and progress tracking.
                         </p>
+                        <div className="flex items-center gap-4">
+                            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all">
+                                <Twitter className="w-5 h-5" />
+                            </a>
+                            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all">
+                                <Github className="w-5 h-5" />
+                            </a>
+                            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all">
+                                <Linkedin className="w-5 h-5" />
+                            </a>
+                            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all">
+                                <Youtube className="w-5 h-5" />
+                            </a>
+                        </div>
                     </div>
 
                     <div>
-                        <h3 className="font-semibold text-foreground mb-4">Product</h3>
-                        <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li><Link href="/" className="hover:text-foreground transition-colors">Features</Link></li>
-                            <li><Link href="/" className="hover:text-foreground transition-colors">Pricing</Link></li>
-                            <li><span className="text-zinc-600 cursor-not-allowed">Changelog</span></li>
+                        <h4 className="font-bold text-sm uppercase tracking-widest text-foreground mb-6">Product</h4>
+                        <ul className="space-y-4">
+                            <li><Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</Link></li>
+                            <li><Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</Link></li>
+                            <li><Link href="#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Stories</Link></li>
+                            <li><Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 className="font-semibold text-foreground mb-4">Connect</h3>
-                        <div className="flex items-center gap-4">
-                            <a href="#" className="p-2 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
-                                <Twitter className="w-4 h-4" />
-                            </a>
-                            <a href="#" className="p-2 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
-                                <Github className="w-4 h-4" />
-                            </a>
-                            <a href="#" className="p-2 rounded-full border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
-                                <Mail className="w-4 h-4" />
-                            </a>
-                        </div>
+                        <h4 className="font-bold text-sm uppercase tracking-widest text-foreground mb-6">Legal</h4>
+                        <ul className="space-y-4">
+                            <li><Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
+                            <li><Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
+                        </ul>
                     </div>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} CoursifyYT. All rights reserved.</p>
-                    <div className="flex gap-4 mt-4 md:mt-0">
-                        <Link href="#" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-                        <Link href="#" className="hover:text-foreground transition-colors">Terms of Service</Link>
-                    </div>
+                <div className="mt-20 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
+                    <p>© {new Date().getFullYear()} CoursifyYT. All rights reserved.</p>
+                    <p className="flex items-center gap-1.5">
+                        Made with <Heart className="w-3 h-3 text-red-500 fill-current" /> for learners everywhere.
+                    </p>
                 </div>
             </div>
         </footer>

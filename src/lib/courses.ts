@@ -24,6 +24,7 @@ export interface Course {
     totalDuration: number;
     completedDuration: number;
     description?: string;
+    instructorName?: string;
     createdAt: any;
     updatedAt: any;
     tags?: string[];
@@ -39,6 +40,17 @@ export interface CourseVideo {
     isFavorite?: boolean;
     order: number;
     startTime?: number; // start time in seconds for segments
+    endTime?: number;   // end time in seconds for segments (optional)
+}
+
+export interface CustomCourseChapter {
+    title: string;
+    url: string;
+    startTime?: number;
+    endTime?: number;
+    thumbnailUrl?: string;
+    duration?: number;
+    videoId?: string;
 }
 
 export interface FavoriteVideo {
@@ -160,6 +172,7 @@ export async function createCourseFromYouTube(
         totalDuration: ytData.totalDuration,
         completedDuration: 0,
         description: ytData.description || "",
+        instructorName: ytData.channelTitle || "",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     });
@@ -180,6 +193,66 @@ export async function createCourseFromYouTube(
             isFavorite: false,
             order: index,
             startTime: video.startTime || 0
+        });
+    });
+
+    await batch.commit();
+    return courseId;
+}
+
+// Create a custom course manually
+export async function createCustomCourse(
+    userId: string,
+    title: string,
+    description: string,
+    chapters: CustomCourseChapter[],
+    instructorName?: string
+): Promise<string> {
+    // Generate a unique ID for the custom course
+    const courseId = `${userId}_custom_${Date.now()}`;
+    const courseRef = doc(db, 'courses', courseId);
+
+    const batch = writeBatch(db);
+
+    // Use the first chapter's thumbnail as the course thumbnail if available
+    const thumbnailUrl = chapters.find(c => c.thumbnailUrl)?.thumbnailUrl ||
+        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2073&auto=format&fit=crop";
+
+    // Calculate total duration
+    const totalDuration = chapters.reduce((acc, c) => acc + (c.duration || 0), 0);
+
+    // 1. Save Course Metadata
+    batch.set(courseRef, {
+        id: courseId,
+        userId,
+        title,
+        description,
+        sourceUrl: "custom",
+        thumbnailUrl,
+        totalDuration,
+        completedDuration: 0,
+        instructorName: instructorName || "",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
+
+    // 2. Save Videos (Chapters)
+    chapters.forEach((chapter, index) => {
+        const videoId = chapter.videoId || `custom_${index}`;
+        const segmentSuffix = chapter.startTime ? `_s${chapter.startTime}` : '';
+        const videoRef = doc(db, 'course_videos', `${courseId}_${videoId}${segmentSuffix}`);
+
+        batch.set(videoRef, {
+            id: videoId,
+            courseId: courseId,
+            title: chapter.title,
+            thumbnailUrl: chapter.thumbnailUrl || thumbnailUrl,
+            duration: chapter.duration || 0,
+            isCompleted: false,
+            isFavorite: false,
+            order: index,
+            startTime: chapter.startTime || 0,
+            endTime: chapter.endTime || 0
         });
     });
 
@@ -219,6 +292,66 @@ export async function getCourseVideos(courseId: string): Promise<CourseVideo[]> 
 
     // Sort in memory to avoid Firestore composite index requirement
     return videos.sort((a, b) => a.order - b.order); // Ascending
+}
+
+// Update an existing custom course
+export async function updateCustomCourse(
+    courseId: string,
+    title: string,
+    description: string,
+    chapters: CustomCourseChapter[],
+    instructorName?: string
+): Promise<void> {
+    const courseRef = doc(db, 'courses', courseId);
+    const batch = writeBatch(db);
+
+    // 1. Calculate total duration and find primary thumbnail
+    const totalDuration = chapters.reduce((acc, c) => acc + (c.duration || 0), 0);
+    const thumbnailUrl = chapters.find(c => c.thumbnailUrl)?.thumbnailUrl ||
+        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2073&auto=format&fit=crop";
+
+    // 2. Update Course Metadata
+    batch.update(courseRef, {
+        title,
+        description,
+        thumbnailUrl,
+        totalDuration,
+        instructorName: instructorName || "",
+        updatedAt: serverTimestamp()
+    });
+
+    // 3. Clear old chapters (videos) and add new ones
+    // First, we get all existing video docs for this course
+    const q = query(
+        collection(db, 'course_videos'),
+        where('courseId', '==', courseId)
+    );
+    const snapshot = await getDocs(q);
+    snapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+    });
+
+    // 4. Add new chapters
+    chapters.forEach((chapter, index) => {
+        const videoId = chapter.videoId || `custom_${index}`;
+        const segmentSuffix = chapter.startTime ? `_s${chapter.startTime}` : '';
+        const videoRef = doc(db, 'course_videos', `${courseId}_${videoId}${segmentSuffix}`);
+
+        batch.set(videoRef, {
+            id: videoId,
+            courseId: courseId,
+            title: chapter.title,
+            thumbnailUrl: chapter.thumbnailUrl || thumbnailUrl,
+            duration: chapter.duration || 0,
+            isCompleted: false, // In a more complex app, we might want to preserve completion state
+            isFavorite: false,
+            order: index,
+            startTime: chapter.startTime || 0,
+            endTime: chapter.endTime || 0
+        });
+    });
+
+    await batch.commit();
 }
 
 // Mark video as completed/uncompleted
@@ -307,6 +440,16 @@ export async function deleteCourse(courseId: string): Promise<void> {
     });
 
     // 3. (Optional) Notes are left orphaned, but we could delete them as well if needed.
+
+    // 4. Delete favorites associated with this course
+    const favQ = query(
+        collection(db, 'favorites'),
+        where('courseId', '==', courseId)
+    );
+    const favSnapshot = await getDocs(favQ);
+    favSnapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+    });
 
     await batch.commit();
 }

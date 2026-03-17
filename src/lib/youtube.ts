@@ -14,6 +14,7 @@ export interface YouTubeCourseData {
     thumbnailUrl: string;
     description?: string;
     isPlaylist: boolean;
+    channelTitle?: string;
     videos: YouTubeVideoData[];
     totalDuration: number;
 }
@@ -128,6 +129,7 @@ async function fetchPlaylistData(playlistId: string, apiKey: string): Promise<Yo
     const playlistTitle = listData.items?.[0]?.snippet?.title || "Imported Playlist";
     const playlistThumbnail = listData.items?.[0]?.snippet?.thumbnails?.high?.url || videos[0]?.thumbnailUrl;
     const playlistDescription = listData.items?.[0]?.snippet?.description || "";
+    const channelTitle = listData.items?.[0]?.snippet?.channelTitle || "";
 
     const totalDuration = videos.reduce((acc, v) => acc + v.duration, 0);
 
@@ -136,6 +138,7 @@ async function fetchPlaylistData(playlistId: string, apiKey: string): Promise<Yo
         title: playlistTitle,
         thumbnailUrl: playlistThumbnail,
         description: playlistDescription,
+        channelTitle,
         isPlaylist: true,
         videos,
         totalDuration
@@ -162,6 +165,7 @@ async function fetchSingleVideoData(videoId: string, apiKey: string): Promise<Yo
     const duration = parseISO8601Duration(item.contentDetails.duration);
     const title = item.snippet.title;
     const description = item.snippet.description || "";
+    const channelTitle = item.snippet.channelTitle || "";
     const thumbnailUrl = item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url;
 
     const timestamps = parseTimestamps(description, duration);
@@ -195,6 +199,7 @@ async function fetchSingleVideoData(videoId: string, apiKey: string): Promise<Yo
         title,
         thumbnailUrl,
         description,
+        channelTitle,
         isPlaylist: false,
         videos,
         totalDuration: duration

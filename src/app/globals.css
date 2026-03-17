@@ -55,6 +55,59 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Custom Variables for Landing Page Design - Light Mode */
+  --bg-base: #f8fafc;
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-highlight: rgba(255, 255, 255, 0.5);
+  --text-main: #020817;
+  --text-muted: rgba(2, 8, 23, 0.6);
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+  --blur-heavy: blur(32px) saturate(180%);
+  --transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+
+  --orb-1-bg: rgba(80, 50, 200, 0.2);
+  --orb-2-bg: rgba(40, 100, 150, 0.15);
+
+  --card-shadow: 0 24px 48px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  --btn-primary-bg: #000000;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: rgba(0, 0, 0, 0.05);
+  --btn-secondary-text: #000000;
+  --btn-secondary-border: rgba(0, 0, 0, 0.1);
+  --btn-secondary-hover: rgba(0, 0, 0, 0.08);
+
+  --icon-bg: rgba(0, 0, 0, 0.05);
+  --icon-color: #000000;
+
+  --nav-bg: rgba(255, 255, 255, 0.6);
+
+  --widget-bg-image: url('https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=1000');
+  --widget-overlay: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.9) 70%, rgba(255, 255, 255, 1) 100%);
+  --widget-source-bg: rgba(0, 0, 0, 0.05);
+  --meta-label-color: rgba(0, 0, 0, 0.5);
+  --meta-value-color: #000000;
+
+  --comp-bad-bg: rgba(255, 100, 100, 0.05);
+  --comp-bad-border: rgba(255, 50, 50, 0.15);
+
+  --chapter-bg: rgba(0, 0, 0, 0.03);
+  --chapter-border: rgba(0, 0, 0, 0.05);
+  --chapter-active-bg: rgba(0, 0, 0, 0.08);
+  --chapter-active-border: rgba(0, 0, 0, 0.1);
+
+  --notes-dot-bg: rgba(0, 0, 0, 0.2);
+
+  --pro-card-bg: rgba(240, 240, 255, 0.5);
+  --pro-card-border: rgba(150, 150, 255, 0.3);
+  --pro-card-shadow: 0 0 80px rgba(100, 100, 255, 0.1);
+
+  --cta-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.8) 100%);
 }
 
 .dark {
@@ -90,6 +143,52 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Custom Variables for Landing Page Design - Dark Mode */
+  --bg-base: #020203;
+  --glass-bg: rgba(24, 24, 27, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-highlight: rgba(255, 255, 255, 0.15);
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.5);
+
+  --orb-1-bg: rgba(80, 50, 200, 0.4);
+  --orb-2-bg: rgba(40, 100, 150, 0.3);
+
+  --card-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  --btn-primary-bg: #ffffff;
+  --btn-primary-text: #000000;
+  --btn-secondary-bg: rgba(255, 255, 255, 0.12);
+  --btn-secondary-text: #ffffff;
+  --btn-secondary-border: rgba(255, 255, 255, 0.05);
+  --btn-secondary-hover: rgba(255, 255, 255, 0.2);
+
+  --icon-bg: rgba(255, 255, 255, 0.1);
+  --icon-color: #ffffff;
+
+  --nav-bg: rgba(20, 20, 20, 0.6);
+
+  --widget-overlay: linear-gradient(to bottom, rgba(10, 10, 12, 0.2) 0%, rgba(10, 10, 12, 0.9) 70%, rgba(10, 10, 12, 1) 100%);
+  --widget-source-bg: rgba(255, 255, 255, 0.1);
+  --meta-label-color: rgba(255, 255, 255, 0.4);
+  --meta-value-color: #ffffff;
+
+  --comp-bad-bg: rgba(20, 10, 10, 0.3);
+  --comp-bad-border: rgba(255, 50, 50, 0.1);
+
+  --chapter-bg: rgba(255, 255, 255, 0.03);
+  --chapter-border: rgba(255, 255, 255, 0.05);
+  --chapter-active-bg: rgba(255, 255, 255, 0.1);
+  --chapter-active-border: rgba(255, 255, 255, 0.15);
+
+  --notes-dot-bg: rgba(255, 255, 255, 0.2);
+
+  --pro-card-bg: rgba(40, 40, 50, 0.5);
+  --pro-card-border: rgba(150, 150, 255, 0.3);
+  --pro-card-shadow: 0 0 80px rgba(100, 100, 255, 0.1);
+
+  --cta-bg: linear-gradient(180deg, rgba(30, 30, 35, 0.8) 0%, rgba(20, 20, 22, 0.8) 100%);
 }
 
 @layer base {
@@ -98,7 +197,9 @@
   }
 
   body {
-    @apply min-h-screen antialiased selection:bg-primary/30 bg-background text-foreground;
+    @apply min-h-screen antialiased selection:bg-primary/30 text-foreground;
+    background-color: var(--bg-base);
+    color: var(--text-main);
   }
 
   html {
@@ -111,20 +212,128 @@
 }
 
 @layer utilities {
-  .glass {
-    @apply bg-background border border-border shadow-sm;
+  .ambient-bg {
+    @apply fixed top-0 left-0 w-screen h-screen -z-10 overflow-hidden pointer-events-none;
+    background: var(--bg-base);
+  }
+
+  .ambient-orb {
+    @apply absolute rounded-full;
+    filter: blur(120px);
+    opacity: 0.3;
+    animation: float 20s ease-in-out infinite alternate;
+  }
+
+  .orb-1 {
+    width: 600px;
+    height: 600px;
+    background: var(--orb-1-bg);
+    top: -100px;
+    right: -100px;
+  }
+
+  .orb-2 {
+    width: 500px;
+    height: 500px;
+    background: var(--orb-2-bg);
+    bottom: -200px;
+    left: -100px;
+    animation-delay: -5s;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+      transform: translate(-50px, 50px) scale(1.1);
+    }
+  }
+
+  .glass-panel {
+    background-color: var(--glass-bg);
+    backdrop-filter: var(--blur-heavy);
+    -webkit-backdrop-filter: var(--blur-heavy);
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid var(--glass-border-highlight);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
   }
 
   .glass-card {
-    @apply bg-card border border-border shadow-sm hover:border-primary/50 transition-all duration-300;
+    background-color: var(--glass-bg);
+    backdrop-filter: var(--blur-heavy);
+    -webkit-backdrop-filter: var(--blur-heavy);
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid var(--glass-border-highlight);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
+  .glass-card:hover {
+    border-color: color-mix(in oklab, var(--primary) 50%, transparent);
   }
 
   .text-glow {
     text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
   }
 
+  .btn {
+    @apply inline-flex items-center justify-center px-7 py-3.5 rounded-full text-[0.95rem] font-medium no-underline cursor-pointer border-none transition-all duration-300;
+  }
+
+  .btn-primary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+  }
+
+  .btn-primary:active,
+  .btn-primary:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .dark .btn-primary:active,
+  .dark .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-secondary {
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--btn-secondary-border);
+  }
+
+  .btn-secondary:active,
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--btn-secondary-hover);
+  }
+
+  .btn-icon {
+    @apply p-2.5 rounded-full flex items-center justify-center;
+    background: var(--icon-bg);
+    color: var(--icon-color);
+  }
+
+  .btn-icon:hover {
+    opacity: 0.8;
+  }
+
   .tiptap-editor p {
     @apply mb-4;
+  }
+
+  .tiptap-editor li p {
+    @apply mb-1;
   }
 
   .tiptap-editor h2 {
@@ -132,11 +341,23 @@
   }
 
   .tiptap-editor ul {
-    @apply list-disc list-inside mb-4 space-y-1;
+    @apply list-disc ml-6 mb-4 marker:text-primary;
+  }
+
+  .tiptap-editor ul li {
+    @apply mb-1 pl-1;
   }
 
   .tiptap-editor ol {
-    @apply list-decimal list-inside mb-4 space-y-1;
+    @apply list-decimal ml-6 mb-4 marker:text-primary marker:font-bold;
+  }
+
+  .tiptap-editor ol li {
+    @apply mb-1 pl-1;
+  }
+
+  .tiptap-editor ol p {
+    @apply mb-1;
   }
 
   .tiptap-editor blockquote {
@@ -158,6 +379,58 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Activity Heatmap Styles */
+  .react-calendar-heatmap .color-empty {
+    fill: rgba(0, 0, 0, 0.05);
+  }
+
+  .react-calendar-heatmap .color-scale-1 {
+    fill: #dcfce7;
+  }
+
+  .react-calendar-heatmap .color-scale-2 {
+    fill: #86efac;
+  }
+
+  .react-calendar-heatmap .color-scale-3 {
+    fill: #22c55e;
+  }
+
+  .react-calendar-heatmap .color-scale-4 {
+    fill: #166534;
+  }
+
+  /* Dark Mode specific */
+  .dark .react-calendar-heatmap .color-empty {
+    fill: rgba(255, 255, 255, 0.05);
+  }
+
+  .dark .react-calendar-heatmap .color-scale-1 {
+    fill: #064e3b;
+  }
+
+  .dark .react-calendar-heatmap .color-scale-2 {
+    fill: #065f46;
+  }
+
+  .dark .react-calendar-heatmap .color-scale-3 {
+    fill: #059669;
+  }
+
+  .dark .react-calendar-heatmap .color-scale-4 {
+    fill: #10b981;
+  }
+
+  .react-calendar-heatmap text {
+    font-size: 10px;
+    fill: var(--text-muted);
+  }
+
+  .react-calendar-heatmap rect:hover {
+    stroke: var(--primary);
+    stroke-width: 1px;
   }
 }
 

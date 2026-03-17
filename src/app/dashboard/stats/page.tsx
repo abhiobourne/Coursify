@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { getUserActivity, DailyActivity, getUserCourses, Course } from "@/lib/courses";
 import { Loader2, TrendingUp, Clock, Calendar, CheckCircle, ChevronLeft } from "lucide-react";
+import { ActivityHeatmap } from "@/components/ui/ActivityHeatmap";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -107,144 +108,147 @@ export default function StatsPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 animate-in fade-in duration-500 max-w-5xl">
-            <div className="flex items-center gap-4 mb-8">
-                <Link href="/dashboard" className="p-2 hover:bg-white/10 rounded-lg text-muted-foreground hover:text-foreground transition-colors">
-                    <ChevronLeft className="w-5 h-5" />
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">Learning Analytics</h1>
-                    <p className="text-muted-foreground">Track your progress and build learning habits.</p>
+        <div className="container mx-auto px-4 py-8 animate-in fade-in duration-700 max-w-6xl pt-24">
+            {/* Header Section */}
+            <div className="mb-16 relative">
+                <div className="absolute inset-0 max-w-lg mx-auto bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+                <div className="relative text-center space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-primary text-xs font-bold tracking-widest uppercase mb-4">
+                        <TrendingUp className="w-4 h-4" />
+                        Analytics Dashboard
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-black bg-gradient-to-br from-white via-white/90 to-white/50 bg-clip-text text-transparent tracking-tight">
+                        Learning Insights.
+                    </h1>
+                    <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto font-medium">
+                        Quantify your knowledge growth, track consistency, and measure your mastery over time.
+                    </p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-
+            {/* Stats Overview Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 px-2">
                 {/* Streak Card */}
-                <div className="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -mr-10 -mt-10" />
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-orange-500" />
+                <div className="relative group overflow-hidden rounded-3xl bg-black/40 border border-white/10 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-orange-500/50 hover:shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative z-10">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                <TrendingUp className="w-6 h-6 text-orange-500" />
+                            </div>
+                            <div className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-500 text-[10px] font-bold uppercase tracking-widest">
+                                Best: {maxStreak}
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Current Streak</p>
-                            <h3 className="text-2xl font-bold text-foreground flex items-baseline gap-1">
-                                {currentStreak} <span className="text-base font-medium text-muted-foreground">days</span>
-                                {currentStreak > 0 && <span className="ml-2 text-xl">🔥</span>}
-                            </h3>
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Current Streak</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-5xl font-black text-white tracking-tighter">{currentStreak}</span>
+                            <span className="text-lg font-bold text-white/50 uppercase">Days</span>
+                            {currentStreak > 0 && <span className="text-2xl animate-bounce ml-2">🔥</span>}
                         </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-border/50 flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">Best Streak:</span>
-                        <span className="font-semibold text-foreground">{maxStreak} days</span>
                     </div>
                 </div>
 
-                {/* Total Hours Card */}
-                <div className="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10" />
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-blue-500" />
+                {/* Hours Card */}
+                <div className="relative group overflow-hidden rounded-3xl bg-black/40 border border-white/10 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-blue-500/50 hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative z-10">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                <Clock className="w-6 h-6 text-blue-500" />
+                            </div>
+                            <div className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-bold uppercase tracking-widest">
+                                {totalCoursesCount} Courses
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Total Time Listened</p>
-                            <h3 className="text-2xl font-bold text-foreground flex items-baseline gap-1">
-                                {totalHours} <span className="text-base font-medium text-muted-foreground">hrs</span>
-                            </h3>
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Study Volume</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-5xl font-black text-white tracking-tighter">{totalHours}</span>
+                            <span className="text-lg font-bold text-white/50 uppercase">Hours</span>
                         </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-border/50 flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">Total Lessons:</span>
-                        <span className="font-semibold text-foreground">{totalCoursesCount}</span>
                     </div>
                 </div>
 
-                {/* Completed Courses Card */}
-                <div className="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl -mr-10 -mt-10" />
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                            <CheckCircle className="w-6 h-6 text-green-500" />
+                {/* Completion Card */}
+                <div className="relative group overflow-hidden rounded-3xl bg-black/40 border border-white/10 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-green-500/50 hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative z-10">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center border border-green-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                <CheckCircle className="w-6 h-6 text-green-500" />
+                            </div>
+                            <div className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-[10px] font-bold uppercase tracking-widest">
+                                {activeDays.length} Active
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                            <h3 className="text-2xl font-bold text-foreground flex items-baseline gap-1">
-                                {completedCoursesCount} <span className="text-base font-medium text-muted-foreground">courses</span>
-                            </h3>
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Mastery Index</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-5xl font-black text-white tracking-tighter">{completedCoursesCount}</span>
+                            <span className="text-lg font-bold text-white/50 uppercase">Finished</span>
                         </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-border/50 flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">Active Days:</span>
-                        <span className="font-semibold text-foreground">{activeDays.length}</span>
                     </div>
                 </div>
 
+                {/* Consistency Card */}
+                <div className="relative group overflow-hidden rounded-3xl bg-black/40 border border-white/10 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-purple-500/50 hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative z-10">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                <Calendar className="w-6 h-6 text-purple-500" />
+                            </div>
+                            <div className="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-500 text-[10px] font-bold uppercase tracking-widest gap-1 flex items-center">
+                                Tenure: {Math.ceil(Math.abs(Date.now() - new Date(user.metadata.creationTime || Date.now()).getTime()) / (1000 * 60 * 60 * 24))}d
+                            </div>
+                        </div>
+                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Consistency Pulse</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-5xl font-black text-white tracking-tighter">
+                                {Math.round((activeDays.length / Math.max(1, (new Date().getTime() - new Date(user.metadata.creationTime || Date.now()).getTime()) / (1000 * 60 * 60 * 24))) * 100)}
+                            </span>
+                            <span className="text-lg font-bold text-white/50 uppercase">%</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Activity Chart Area */}
-            <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-primary" />
-                        Activity History
-                    </h2>
+            {/* Heatmap Area */}
+            <div className="relative group overflow-hidden rounded-3xl bg-black/40 border border-white/10 p-10 shadow-2xl backdrop-blur-xl mb-16">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-40 -mt-40 pointer-events-none" />
+
+                <div className="relative z-10">
+                    <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
+                        <div className="flex flex-col gap-2">
+                            <h2 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+                                <div className="w-2 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]"></div>
+                                Activity Heatmap
+                            </h2>
+                            <p className="text-muted-foreground font-medium pl-5 max-w-md">Visualize your daily study efforts and track your learning persistence over the year.</p>
+                        </div>
+                    </div>
+
+                    {activities.length === 0 ? (
+                        <div className="text-center py-20 flex flex-col items-center gap-4 bg-white/5 rounded-2xl border border-white/5">
+                            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary/80 mb-2">
+                                <Calendar className="w-10 h-10" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white tracking-tight">No Activity Yet</h3>
+                            <p className="text-muted-foreground font-medium max-w-sm">Start watching courses to begin building your activity heatmap.</p>
+                            <Link href="/dashboard" className="mt-4 px-8 py-3 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                                Browse Courses
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="pt-4 overflow-x-auto pb-4 custom-scrollbar bg-black/50 rounded-2xl border border-white/5 p-8">
+                            <div className="min-w-[800px]">
+                                <ActivityHeatmap />
+                            </div>
+                        </div>
+                    )}
                 </div>
-
-                {activities.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                        <p>No activity recorded yet. Start watching a course to build your history!</p>
-                    </div>
-                ) : (
-                    <div className="h-64 flex items-end gap-2 overflow-x-auto pb-4 pt-8">
-                        {/* Simple Bar Chart */}
-                        {(() => {
-                            // Get last 14 days
-                            const d = new Date();
-                            const pastDays = [];
-                            for (let i = 13; i >= 0; i--) {
-                                const past = new Date(d);
-                                past.setDate(d.getDate() - i);
-                                pastDays.push(past.toISOString().split('T')[0]);
-                            }
-
-                            // Find max activity
-                            const maxSecs = Math.max(...activities.map(a => a.secondsStudied), 1); // min 1 to avoid div by 0
-
-                            return pastDays.map(dateStr => {
-                                const act = activities.find(a => a.dateStr === dateStr);
-                                const secs = act ? act.secondsStudied : 0;
-                                const hrs = secs / 3600;
-                                const mins = secs / 60;
-                                const heightPct = Math.max((secs / maxSecs) * 100, 2); // 2% minimum height for visibility
-                                const isToday = dateStr === d.toISOString().split('T')[0];
-                                const label = new Date(dateStr).toLocaleDateString(undefined, { weekday: 'short' });
-
-                                return (
-                                    <div key={dateStr} className="flex-1 min-w-[30px] flex flex-col items-center gap-2 group relative">
-                                        {/* Tooltip */}
-                                        <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-1 rounded text-xs text-white whitespace-nowrap z-10 pointer-events-none">
-                                            {hrs > 1 ? `${Math.round(hrs * 10) / 10} hrs` : `${Math.round(mins)} mins`}
-                                        </div>
-
-                                        <div className="w-full flex-1 flex items-end bg-white/5 rounded-t-sm overflow-hidden">
-                                            <div
-                                                className={`w-full rounded-t-sm transition-all duration-1000 ${secs > 0 ? (isToday ? 'bg-primary' : 'bg-primary/60') : 'bg-transparent'}`}
-                                                style={{ height: `${heightPct}%` }}
-                                            />
-                                        </div>
-                                        <span className={`text-[10px] uppercase font-medium ${isToday ? 'text-primary' : 'text-zinc-500'}`}>
-                                            {label.charAt(0)}
-                                        </span>
-                                    </div>
-                                );
-                            });
-                        })()}
-                    </div>
-                )}
             </div>
-
         </div>
     );
 }
+
+import { ChevronRight } from "lucide-react";

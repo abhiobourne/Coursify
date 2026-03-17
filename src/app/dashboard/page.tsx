@@ -6,9 +6,11 @@ import { getUserCourses, deleteCourse, getFavoriteVideos, Course, FavoriteVideo 
 import { CourseCard } from "@/components/ui/CourseCard";
 import { FavoriteVideoCard } from "@/components/ui/FavoriteVideoCard";
 import { AddCourseDialog } from "@/components/ui/AddCourseDialog";
+import { ActivityHeatmap } from "@/components/ui/ActivityHeatmap";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon } from "lucide-react";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -51,9 +53,12 @@ export default function Dashboard() {
         try {
             await deleteCourse(courseId);
             setCourses(prev => prev.filter(c => c.id !== courseId));
+            toast.success("Course deleted successfully", {
+                style: { background: "#22c55e", color: "#fff", border: "none" }
+            });
         } catch (error) {
             console.error("Error deleting course:", error);
-            alert("Failed to delete course");
+            toast.error("Failed to delete course");
         }
     };
 
@@ -112,6 +117,8 @@ export default function Dashboard() {
                     <AddCourseDialog />
                 </div>
             </div>
+
+
 
             <div className="flex items-center gap-4 mb-8 border-b border-border pb-px">
                 <button
