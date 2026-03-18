@@ -1,10 +1,10 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="128" fill="url(#paint0_linear)"/>
-  <path d="M348 238.4C358.667 244.558 358.667 259.954 348 266.111L216 342.325C205.333 348.483 192 340.785 192 328.469L192 176.042C192 163.727 205.333 156.028 216 162.186L348 238.4Z" fill="white"/>
-  <defs>
-    <linearGradient id="paint0_linear" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#EF4444" />
-      <stop offset="1" stop-color="#B91C1C" />
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <style>
+    .icon { stroke: #000; }
+    @media (prefers-color-scheme: dark) {
+      .icon { stroke: #FFF; }
+    }
+  </style>
+  <rect class="icon" width="18" height="18" x="3" y="3" rx="2"/>
+  <path class="icon" d="m9 8 6 4-6 4Z"/>
 </svg>
