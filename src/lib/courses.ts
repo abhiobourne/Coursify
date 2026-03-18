@@ -10,7 +10,8 @@ import {
     updateDoc,
     serverTimestamp,
     increment,
-    writeBatch
+    writeBatch,
+    limit
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { YouTubeCourseData } from './youtube';
@@ -28,6 +29,10 @@ export interface Course {
     createdAt: any;
     updatedAt: any;
     tags?: string[];
+    privacy?: 'private' | 'protected' | 'public';
+    creatorId?: string;
+    creatorName?: string;
+    likes?: number;
 }
 
 export interface CourseVideo {
@@ -113,7 +118,7 @@ export async function getCourse(courseId: string): Promise<Course | null> {
 }
 
 // Full import flow
-export async function importCourse(userId: string, url: string): Promise<string> {
+export async function importCourse(userId: string, url: string, creatorName: string = "Anonymous"): Promise<string> {
     const ytId = getYouTubeIdFromUrl(url);
     if (!ytId) throw new Error("Invalid YouTube URL");
 
@@ -137,7 +142,7 @@ export async function importCourse(userId: string, url: string): Promise<string>
     const ytData = await res.json();
 
     // 3. Create the course in Firestore
-    const newId = await createCourseFromYouTube(userId, url, ytData);
+    const newId = await createCourseFromYouTube(userId, url, ytData, creatorName);
     return "CREATED_" + newId;
 }
 
@@ -145,7 +150,8 @@ export async function importCourse(userId: string, url: string): Promise<string>
 export async function createCourseFromYouTube(
     userId: string,
     sourceUrl: string,
-    ytData: YouTubeCourseData
+    ytData: YouTubeCourseData,
+    creatorName: string = "Anonymous"
 ): Promise<string> {
     // Use the YouTube ID directly or a composite to prevent duplicates
     const courseId = `${userId}_${ytData.id}`;
@@ -173,6 +179,10 @@ export async function createCourseFromYouTube(
         completedDuration: 0,
         description: ytData.description || "",
         instructorName: ytData.channelTitle || "",
+        privacy: "private",
+        creatorId: userId,
+        creatorName,
+        likes: 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     });
@@ -206,7 +216,8 @@ export async function createCustomCourse(
     title: string,
     description: string,
     chapters: CustomCourseChapter[],
-    instructorName?: string
+    instructorName?: string,
+    creatorName: string = "Anonymous"
 ): Promise<string> {
     // Generate a unique ID for the custom course
     const courseId = `${userId}_custom_${Date.now()}`;
@@ -232,6 +243,10 @@ export async function createCustomCourse(
         totalDuration,
         completedDuration: 0,
         instructorName: instructorName || "",
+        privacy: "private",
+        creatorId: userId,
+        creatorName,
+        likes: 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
     });
@@ -279,6 +294,33 @@ export async function getUserCourses(userId: string): Promise<Course[]> {
 }
 
 
+
+// Get all public courses for explore page
+export async function getAllPublicCourses(): Promise<Course[]> {
+    const q = query(
+        collection(db, 'courses'),
+        where('privacy', '==', 'public'),
+        orderBy('updatedAt', 'desc'),
+        limit(50)
+    );
+
+    try {
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Course));
+    } catch (e: any) {
+        // If index is missing, fallback to fetching all public and sorting in memory
+        if (e.message && e.message.includes('index')) {
+            const fallbackQ = query(
+                collection(db, 'courses'),
+                where('privacy', '==', 'public')
+            );
+            const snap = await getDocs(fallbackQ);
+            const allCourses = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Course));
+            return allCourses.sort((a, b) => (b.updatedAt?.toMillis?.() || 0) - (a.updatedAt?.toMillis?.() || 0)).slice(0, 50);
+        }
+        throw e;
+    }
+}
 
 // Get all videos for a course
 export async function getCourseVideos(courseId: string): Promise<CourseVideo[]> {
@@ -541,4 +583,110 @@ export async function recordStudyTime(userId: string, seconds: number): Promise<
         secondsStudied: increment(seconds),
         updatedAt: serverTimestamp()
     }, { merge: true });
+}
+
+// Clone a course (for shared links)
+export async function cloneCourse(courseId: string, newUserId: string): Promise<string> {
+    const originalCourse = await getCourse(courseId);
+    if (!originalCourse) throw new Error("Course not found");
+
+    const videos = await getCourseVideos(courseId);
+
+    // Reuse suffix logic or fallback to timestamp
+    const originalSuffix = originalCourse.id.split('_').slice(1).join('_');
+    const newCourseId = `${newUserId}_${originalSuffix || Date.now()}`;
+
+    const existing = await getCourse(newCourseId);
+    if (existing) return newCourseId;
+
+    const courseRef = doc(db, 'courses', newCourseId);
+    const batch = writeBatch(db);
+
+    batch.set(courseRef, {
+        ...originalCourse,
+        id: newCourseId,
+        userId: newUserId,
+        completedDuration: 0,
+        privacy: "private",
+        likes: 0,
+        creatorId: originalCourse.creatorId || originalCourse.userId,
+        creatorName: originalCourse.creatorName || "Anonymous",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
+
+    videos.forEach(video => {
+        const segmentSuffix = video.startTime ? `_s${video.startTime}` : '';
+        const newVideoId = `${newCourseId}_${video.id}${segmentSuffix}`;
+        const videoRef = doc(db, 'course_videos', newVideoId);
+
+        batch.set(videoRef, {
+            ...video,
+            courseId: newCourseId,
+            isCompleted: false,
+            isFavorite: false,
+        });
+    });
+
+    await batch.commit();
+    return newCourseId;
+}
+
+// Update course privacy
+export async function updateCoursePrivacy(courseId: string, privacy: 'private' | 'protected' | 'public'): Promise<void> {
+    const courseRef = doc(db, 'courses', courseId);
+    await updateDoc(courseRef, {
+        privacy,
+        updatedAt: serverTimestamp()
+    });
+}
+
+// Toggle Course Like
+export async function toggleCourseLike(
+    courseId: string,
+    userId: string,
+    isCurrentlyLiked: boolean
+): Promise<void> {
+    const likeId = `${userId}_${courseId}`;
+    const likeRef = doc(db, 'course_likes', likeId);
+    const courseRef = doc(db, 'courses', courseId);
+
+    const batch = writeBatch(db);
+
+    if (isCurrentlyLiked) {
+        batch.delete(likeRef);
+        batch.update(courseRef, {
+            likes: increment(-1)
+        });
+    } else {
+        batch.set(likeRef, {
+            id: likeId,
+            userId,
+            courseId,
+            createdAt: serverTimestamp()
+        });
+        batch.update(courseRef, {
+            likes: increment(1)
+        });
+    }
+
+    await batch.commit();
+}
+
+// Check if user liked a course
+export async function hasUserLikedCourse(courseId: string, userId: string): Promise<boolean> {
+    const likeId = `${userId}_${courseId}`;
+    const likeRef = doc(db, 'course_likes', likeId);
+    const docSnap = await getDoc(likeRef);
+    return docSnap.exists();
+}
+
+// Get all liked course IDs for a user
+export async function getUserLikedCourseIds(userId: string): Promise<string[]> {
+    const q = query(
+        collection(db, 'course_likes'),
+        where('userId', '==', userId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => doc.data().courseId as string);
 }

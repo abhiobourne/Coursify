@@ -14,7 +14,8 @@ import {
     CheckCircle2,
     ChevronRight,
     PlaySquare,
-    Medal
+    Medal,
+    Library
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -112,7 +113,7 @@ export default function ProfilePage() {
                         <Link href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/10 text-foreground transition-all text-sm font-medium">
                             <UserAvatarPlaceholder className="w-4 h-4 opacity-80" /> Overview
                         </Link>
-                        <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all text-sm font-medium">
+                        <Link href="/my-courses" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all text-sm font-medium">
                             <BookOpen className="w-4 h-4 opacity-80" /> My Courses
                         </Link>
                         <Link href="/settings" className="flex items-center gap-3 px-4 py-3 rounded-2xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all text-sm font-medium">

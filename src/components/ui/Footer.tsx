@@ -38,7 +38,7 @@ export function Footer() {
                         <h4 className="font-bold text-sm uppercase tracking-widest text-foreground mb-6">Product</h4>
                         <ul className="space-y-4">
                             <li><Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</Link></li>
-                            <li><Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</Link></li>
+                            <li><Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</Link></li>
                             <li><Link href="#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Stories</Link></li>
                             <li><Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
                         </ul>
@@ -49,12 +49,19 @@ export function Footer() {
                         <ul className="space-y-4">
                             <li><Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
                             <li><Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
-                            <li><Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
+                            <li><Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-sm uppercase tracking-widest text-foreground mb-6">Company</h4>
+                        <ul className="space-y-4">
+                            <li><Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
+                            <li><Link href="/feedback" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Feedback</Link></li>
                         </ul>
                     </div>
                 </div>
 
-                <div className="mt-20 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
+                <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
                     <p>© {new Date().getFullYear()} CoursifyYT. All rights reserved.</p>
                     <p className="flex items-center gap-1.5">
                         Made with <Heart className="w-3 h-3 text-red-500 fill-current" /> for learners everywhere.

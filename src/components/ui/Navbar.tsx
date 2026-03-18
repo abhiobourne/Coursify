@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, LogOut, LayoutDashboard, PlaySquare, LineChart, User, Settings, ChevronDown } from "lucide-react";
+import { LogIn, LogOut, LayoutDashboard, PlaySquare, LineChart, User, Settings, ChevronDown, BookOpen, Globe, Library } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
 import {
@@ -13,13 +14,32 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export default function Navbar() {
     const { user, signInWithGoogle, logOut } = useAuth();
+    const pathname = usePathname();
+    const isCourseView = pathname?.startsWith("/course/");
+    const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
     return (
-        <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-between gap-8 px-6 py-3 rounded-full bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-lg dark:shadow-2xl w-[90%] max-w-5xl transition-all duration-300">
+        <nav className={cn(
+            "z-[100] flex items-center justify-between gap-8 px-6 py-3 bg-white/90 dark:bg-zinc-900/60 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-lg dark:shadow-2xl transition-all duration-300",
+            isCourseView
+                ? "sticky top-0 w-full rounded-none"
+                : "fixed top-6 left-1/2 -translate-x-1/2 rounded-full w-[90%] max-w-5xl"
+        )}>
             <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
                 <PlaySquare className="w-5 h-5 text-primary dark:text-white" />
                 <span className="font-bold text-lg tracking-tight text-foreground dark:text-white">
@@ -28,9 +48,11 @@ export default function Navbar() {
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
+                <Link href="/explore" className="text-sm font-bold text-primary dark:text-blue-400 hover:opacity-80 transition-opacity">Explore</Link>
                 <Link href="/#features" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Features</Link>
                 <Link href="/#testimonials" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Stories</Link>
-                <Link href="/#pricing" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Pricing</Link>
+                <Link href="/pricing" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Pricing</Link>
+                <Link href="/about" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">About</Link>
             </div>
 
             <div className="flex items-center gap-3">
@@ -53,7 +75,7 @@ export default function Navbar() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                                 align="end"
-                                className="w-64 mt-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 text-foreground shadow-2xl rounded-3xl p-2 animate-in fade-in zoom-in-95 duration-200"
+                                className="w-64 mt-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 text-foreground shadow-2xl rounded-3xl p-2 animate-in fade-in zoom-in-95 duration-200 z-[120]"
                             >
                                 <DropdownMenuLabel className="font-normal px-4 py-4">
                                     <div className="flex items-center gap-3">
@@ -94,6 +116,22 @@ export default function Navbar() {
                                             <span className="font-semibold text-sm">Dashboard</span>
                                         </Link>
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-xl cursor-pointer py-2.5 px-3 transition-colors text-foreground dark:text-white">
+                                        <Link href="/my-courses" className="flex items-center w-full">
+                                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center mr-3 group-focus:bg-primary/20">
+                                                <Library className="h-4 w-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm">My Courses</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-xl cursor-pointer py-2.5 px-3 transition-colors text-foreground dark:text-white">
+                                        <Link href="/explore" className="flex items-center w-full">
+                                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center mr-3 group-focus:bg-primary/20">
+                                                <Globe className="h-4 w-4" />
+                                            </div>
+                                            <span className="font-semibold text-sm">Explore</span>
+                                        </Link>
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="focus:bg-zinc-500/10 rounded-xl cursor-pointer py-2.5 px-3 transition-colors text-foreground dark:text-white">
                                         <Link href="/settings" className="flex items-center w-full">
                                             <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center mr-3">
@@ -106,7 +144,10 @@ export default function Navbar() {
                                 <DropdownMenuSeparator className="bg-black/5 dark:bg-white/10 mx-2" />
                                 <div className="p-1">
                                     <DropdownMenuItem
-                                        onClick={logOut}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setShowSignOutDialog(true);
+                                        }}
                                         className="cursor-pointer text-red-500 dark:text-red-400 focus:text-red-600 dark:focus:text-red-300 focus:bg-red-500/10 rounded-xl py-2.5 px-3 w-full transition-colors"
                                     >
                                         <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center mr-3">
@@ -127,6 +168,31 @@ export default function Navbar() {
                     </button>
                 )}
             </div>
+            {/* Sign Out Confirmation */}
+            {showSignOutDialog && (
+                <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+                    <AlertDialogContent className="bg-white dark:bg-zinc-950 border border-border shadow-2xl rounded-3xl z-[150]">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="text-xl font-bold">Sign Out</AlertDialogTitle>
+                            <AlertDialogDescription className="text-muted-foreground/80">
+                                Are you sure you want to sign out? You will need to sign back in to access your dashboard and courses.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={() => {
+                                    logOut();
+                                    setShowSignOutDialog(false);
+                                }}
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                            >
+                                Sign Out
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </nav>
     );
 }

@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Bold, Italic, List, ListOrdered, Heading2, Quote, Clock } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Custom Extension for # and ## comments
 import { InputRule, markInputRule, Mark, mergeAttributes } from '@tiptap/core';
@@ -52,10 +53,11 @@ interface RichTextEditorProps {
     content: string;
     onChange: (content: string) => void;
     onCaptureTimestamp?: () => void;
+    onTimestampClick?: (time: number) => void;
     editorRef?: React.MutableRefObject<any>;
 }
 
-export function RichTextEditor({ content, onChange, onCaptureTimestamp, editorRef }: RichTextEditorProps) {
+export function RichTextEditor({ content, onChange, onCaptureTimestamp, onTimestampClick, editorRef }: RichTextEditorProps) {
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -69,7 +71,7 @@ export function RichTextEditor({ content, onChange, onCaptureTimestamp, editorRe
         },
         editorProps: {
             attributes: {
-                class: 'tiptap-editor focus:outline-none min-h-[300px] p-6 text-foreground prose prose-sm dark:prose-invert max-w-none',
+                class: 'tiptap-editor focus:outline-none min-h-[150px] p-6 text-foreground prose prose-sm dark:prose-invert max-w-none',
             },
         },
     });
@@ -92,8 +94,8 @@ export function RichTextEditor({ content, onChange, onCaptureTimestamp, editorRe
     }
 
     return (
-        <div className="flex flex-col h-full bg-card border border-border rounded-2xl overflow-hidden focus-within:border-primary/50 transition-colors">
-            <div className="flex items-center gap-1 p-2 border-b border-border bg-muted/50 flex-wrap">
+        <div className="flex flex-col bg-card border border-border rounded-2xl overflow-hidden focus-within:border-primary/50 transition-colors h-[400px]">
+            <div className="flex items-center gap-1 p-2 border-b border-border bg-muted/50 flex-wrap shrink-0 z-10">
                 <button
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     className={`p-2 rounded hover:bg-accent ${editor.isActive('bold') ? 'bg-accent text-foreground' : 'text-muted-foreground'}`}
@@ -154,8 +156,25 @@ export function RichTextEditor({ content, onChange, onCaptureTimestamp, editorRe
                 )}
             </div>
 
-            <div className="flex-1 overflow-y-auto overflow-x-hidden cursor-text text-base leading-relaxed" onClick={() => editor.chain().focus().run()}>
-                <EditorContent editor={editor} className="h-full max-w-full break-words [&_.ProseMirror]:min-h-full" />
+            <div className="flex-1 w-full overflow-y-auto">
+                <div
+                    className="cursor-text text-base leading-relaxed p-4 min-h-full"
+                    onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.classList.contains('timestamp') && e.ctrlKey) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (onTimestampClick) {
+                                const time = target.getAttribute('data-time');
+                                if (time) onTimestampClick(Number(time));
+                            }
+                            return;
+                        }
+                        editor.chain().focus().run();
+                    }}
+                >
+                    <EditorContent editor={editor} className="h-full max-w-full break-words [&_.ProseMirror]:min-h-full [&_.ProseMirror]:outline-none" />
+                </div>
             </div>
         </div>
     );

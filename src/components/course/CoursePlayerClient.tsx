@@ -153,10 +153,18 @@ export default function CoursePlayerClient({
         const s = Math.floor(time % 60);
         const formattedTime = h > 0 ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}` : `${m}:${s.toString().padStart(2, '0')}`;
 
+        const totalSeconds = Math.floor(time);
+
         const editor = editorRef.current;
         editor.chain().focus()
-            .insertContent(`<br><strong>[${formattedTime}]</strong> `)
+            .insertContent(`<br><span class="timestamp text-blue-500 font-semibold cursor-pointer hover:underline" data-time="${totalSeconds}">[${formattedTime}]</span> `)
             .run();
+    };
+
+    const handleTimestampSeek = (time: number) => {
+        if (!playerRef.current) return;
+        playerRef.current.seekTo(time);
+        playerRef.current.playVideo();
     };
 
     const handleVideoReady = (e: any) => {
@@ -169,6 +177,14 @@ export default function CoursePlayerClient({
     };
 
     const handleCopyShareLink = () => {
+        if (course.privacy === 'private') {
+            if (!course.creatorId || course.creatorId === user?.uid) {
+                toast.error("This course is private. Change visibility to Link Sharing or Public to share.");
+            } else {
+                toast.error("This imported course is private. You cannot share its progress.");
+            }
+            return;
+        }
         const link = `${window.location.origin}/shared/${course.id}`;
         navigator.clipboard.writeText(link);
         toast.success("Share link copied to clipboard!");
@@ -397,7 +413,7 @@ export default function CoursePlayerClient({
                             }}
                             onReady={handleVideoReady}
                             onEnd={handleVideoEnd}
-                            key={activeVideo.id}
+                            key={`${activeVideo.id}_${activeVideo.startTime || 0}`}
                             className="w-full h-full"
                             iframeClassName="w-full h-full"
                         />
@@ -504,6 +520,7 @@ export default function CoursePlayerClient({
                                 content={note}
                                 onChange={handleNoteChange}
                                 onCaptureTimestamp={handleCaptureTimestamp}
+                                onTimestampClick={handleTimestampSeek}
                                 editorRef={editorRef}
                             />
                         </div>

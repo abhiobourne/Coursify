@@ -1,13 +1,14 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlaySquare, Video, ArrowRight, Loader2, ListVideo, Star, Quote } from "lucide-react";
 import { Footer } from "@/components/ui/Footer";
+import { getRecentReviews, Review } from "@/lib/reviews";
 
-const REVIEWS = [
+const DEFAULT_REVIEWS = [
   {
     name: "Marcus T.",
     role: "Frontend Developer",
@@ -39,6 +40,21 @@ export default function Home() {
   const [error, setError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [fetchedReviews, setFetchedReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        const revs = await getRecentReviews(3);
+        if (revs && revs.length > 0) {
+          setFetchedReviews(revs);
+        }
+      } catch (err) {
+        console.error("Failed to load reviews:", err);
+      }
+    }
+    loadReviews();
+  }, []);
 
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,6 +211,27 @@ export default function Home() {
             </div>
             <span className="text-[13px]">Auto-generating summary...</span>
           </div>
+
+          {fetchedReviews.length > 0 && (
+            <div className="glass-panel absolute top-[10px] left-2 md:-left-12 px-5 py-4 flex flex-col gap-2 rounded-2xl z-[15] transform translate-z-[60px] shadow-2xl max-w-[280px] animate-in slide-in-from-left-8 duration-700">
+              <div className="flex items-center gap-1">
+                {[...Array(fetchedReviews[0].rating)].map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />
+                ))}
+              </div>
+              <p className="text-sm italic text-foreground line-clamp-3">"{fetchedReviews[0].content}"</p>
+              <div className="flex items-center gap-2 mt-1">
+                {fetchedReviews[0].userPhotoUrl ? (
+                  <img src={fetchedReviews[0].userPhotoUrl} alt="" className="w-5 h-5 rounded-full" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-primary">{fetchedReviews[0].userName.charAt(0)}</span>
+                  </div>
+                )}
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{fetchedReviews[0].userName}</span>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -287,7 +324,7 @@ export default function Home() {
           <h2 className="text-4xl md:text-[3rem] font-semibold tracking-tight">Loved by learners.</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {REVIEWS.map((review, idx) => (
+          {(fetchedReviews.length > 0 ? fetchedReviews : DEFAULT_REVIEWS).slice(0, 3).map((review: any, idx) => (
             <div key={idx} className="glass-panel p-8 flex flex-col gap-6 justify-between group hover:border-primary/30 transition-all duration-500">
               <div className="space-y-4">
                 <div className="flex gap-1">
@@ -301,10 +338,16 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <img src={review.avatar} alt={review.name} className="w-10 h-10 rounded-full object-cover bg-muted ring-2 ring-primary/20" />
+                {review.userPhotoUrl || review.avatar ? (
+                  <img src={review.userPhotoUrl || review.avatar} alt={review.userName || review.name} className="w-10 h-10 rounded-full object-cover bg-muted ring-2 ring-primary/20" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-lg font-bold text-primary">{(review.userName || review.name || "A").charAt(0)}</span>
+                  </div>
+                )}
                 <div>
-                  <div className="font-bold text-sm">{review.name}</div>
-                  <div className="text-xs text-muted-foreground">{review.role}</div>
+                  <div className="font-bold text-sm">{review.userName || review.name}</div>
+                  <div className="text-xs text-muted-foreground">{review.role || "Learner"}</div>
                 </div>
               </div>
             </div>
@@ -312,53 +355,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="pricing" className="py-[120px]">
-        <div className="text-center mb-[64px] max-w-[600px] mx-auto">
-          <h2 className="text-4xl md:text-[3rem] font-semibold tracking-tight">Invest in your intellect.</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
-          <div className="glass-panel p-12 flex flex-col gap-8">
-            <div>
-              <h3 className="text-2xl text-[var(--text-muted)] font-medium mb-2">Basic</h3>
-              <div className="text-[3.5rem] font-bold tracking-tight flex items-baseline gap-1">
-                $0 <span className="text-base font-normal text-[var(--text-muted)]">/ forever</span>
-              </div>
-            </div>
-            <ul className="flex flex-col gap-4">
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-green-400">✓</div> 4 YouTube imported courses</li>
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-green-400">✓</div> 1 Custom mixed course</li>
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-green-400">✓</div> Distraction-free player</li>
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-green-400">✓</div> Manual Markdown notes</li>
-            </ul>
-            <button
-              onClick={() => router.push(user ? '/dashboard' : '/#pricing')}
-              className="btn btn-secondary mt-auto"
-            >
-              {user ? "Current Plan" : "Get Started"}
-            </button>
-          </div>
-          <div className="glass-panel p-12 flex flex-col gap-8 bg-[var(--pro-card-bg)] border-t-[var(--pro-card-border)] shadow-[var(--pro-card-shadow)]">
-            <div>
-              <h3 className="text-2xl text-[var(--text-muted)] font-medium mb-2">Pro</h3>
-              <div className="text-[3.5rem] font-bold tracking-tight flex items-baseline gap-1">
-                $8 <span className="text-base font-normal text-[var(--text-muted)]">/ month</span>
-              </div>
-            </div>
-            <ul className="flex flex-col gap-4">
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-indigo-400">✓</div> Unlimited Courses</li>
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-indigo-400">✓</div> Cloud sync across devices</li>
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-indigo-400">✓</div> AI Auto-summaries</li>
-              <li className="flex items-center gap-3 text-[0.95rem]"><div className="text-indigo-400">✓</div> Export notes to Notion/Obsidian</li>
-            </ul>
-            <button
-              onClick={() => router.push('/#pricing')}
-              className="btn btn-primary mt-auto"
-            >
-              Upgrade to Pro
-            </button>
-          </div>
-        </div>
-      </section>
+
 
       <section className="py-[160px] text-center">
         <div className="glass-panel p-10 md:p-20 flex flex-col items-center gap-8 bg-[var(--cta-bg)]">

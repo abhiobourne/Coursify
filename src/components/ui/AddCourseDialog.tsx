@@ -114,13 +114,14 @@ export function AddCourseDialog({
                     description: "You can only import up to 4 YouTube Courses on the free plan.",
                     action: {
                         label: "View plans",
-                        onClick: () => router.push("/#pricing")
+                        onClick: () => router.push("/pricing")
                     }
                 });
                 return;
             }
 
-            const result = await importCourse(user.uid, url);
+            const creatorName = user.displayName || user.email?.split('@')[0] || "Anonymous";
+            const result = await importCourse(user.uid, url, creatorName);
             finalizeCreation(result);
         } catch (err: any) {
             toast.error(err.message || "Failed to import course.");
@@ -149,7 +150,7 @@ export function AddCourseDialog({
                         description: "You can only create 1 Custom Course on the free plan.",
                         action: {
                             label: "View plans",
-                            onClick: () => router.push("/#pricing")
+                            onClick: () => router.push("/pricing")
                         }
                     });
                     setIsLoading(false);
@@ -199,7 +200,8 @@ export function AddCourseDialog({
                 await updateCustomCourse(courseId, customTitle, customDesc, processedChapters, customInstructor);
                 finalizeCreation("UPDATED_" + courseId);
             } else {
-                const newCourseId = await createCustomCourse(user.uid, customTitle, customDesc, processedChapters, customInstructor);
+                const creatorName = user.displayName || user.email?.split('@')[0] || "Anonymous";
+                const newCourseId = await createCustomCourse(user.uid, customTitle, customDesc, processedChapters, customInstructor, creatorName);
                 finalizeCreation("CREATED_" + newCourseId);
             }
         } catch (err: any) {

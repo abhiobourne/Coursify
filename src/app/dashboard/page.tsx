@@ -2,14 +2,14 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { getUserCourses, deleteCourse, getFavoriteVideos, Course, FavoriteVideo } from "@/lib/courses";
+import { getUserCourses, deleteCourse, getFavoriteVideos, Course, FavoriteVideo, updateCoursePrivacy } from "@/lib/courses";
 import { CourseCard } from "@/components/ui/CourseCard";
 import { FavoriteVideoCard } from "@/components/ui/FavoriteVideoCard";
 import { AddCourseDialog } from "@/components/ui/AddCourseDialog";
 import { ActivityHeatmap } from "@/components/ui/ActivityHeatmap";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon } from "lucide-react";
+import { BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon, Globe } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -37,7 +37,10 @@ export default function Dashboard() {
                         getFavoriteVideos(user.uid)
                     ]);
                     setCourses(userCourses);
-                    setFavorites(userFavs);
+
+                    // Filter out favorites for courses that were deleted
+                    const validFavs = userFavs.filter(fav => userCourses.some(c => c.id === fav.courseId));
+                    setFavorites(validFavs);
                 } catch (error) {
                     console.error("Error loading courses:", error);
                 } finally {
@@ -53,12 +56,24 @@ export default function Dashboard() {
         try {
             await deleteCourse(courseId);
             setCourses(prev => prev.filter(c => c.id !== courseId));
+            setFavorites(prev => prev.filter(f => f.courseId !== courseId));
             toast.success("Course deleted successfully", {
                 style: { background: "#22c55e", color: "#fff", border: "none" }
             });
         } catch (error) {
             console.error("Error deleting course:", error);
             toast.error("Failed to delete course");
+        }
+    };
+
+    const handlePrivacyChange = async (courseId: string, privacy: 'private' | 'protected' | 'public') => {
+        try {
+            await updateCoursePrivacy(courseId, privacy);
+            setCourses(prev => prev.map(c => c.id === courseId ? { ...c, privacy } : c));
+            toast.success(`Course privacy updated to ${privacy}`);
+        } catch (error) {
+            console.error("Error updating privacy:", error);
+            toast.error("Failed to update privacy");
         }
     };
 
@@ -139,6 +154,15 @@ export default function Dashboard() {
                         Favorite Videos
                     </div>
                 </button>
+                <Link
+                    href="/explore"
+                    className="pb-4 px-2 font-medium text-sm transition-colors border-b-2 text-muted-foreground border-transparent hover:text-foreground"
+                >
+                    <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4" />
+                        Explore
+                    </div>
+                </Link>
             </div>
 
             {activeTab === 'courses' && (
@@ -169,6 +193,8 @@ export default function Dashboard() {
                                     key={course.id}
                                     course={course}
                                     onDelete={handleDeleteCourse}
+                                    onPrivacyChange={handlePrivacyChange}
+                                    currentUserId={user?.uid}
                                 />
                             ))}
                     </div>

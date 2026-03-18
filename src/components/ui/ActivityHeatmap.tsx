@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { format, startOfYear, endOfYear, eachDayOfInterval, isSameMonth } from "date-fns";
+import { format, eachDayOfInterval } from "date-fns";
 import { getUserActivity, DailyActivity } from "@/lib/courses";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function ActivityHeatmap() {
     const { user } = useAuth();
@@ -39,34 +40,40 @@ export function ActivityHeatmap() {
         );
     }
 
-    const startDate = startOfYear(new Date(selectedYear, 0, 1));
-    const endDate = endOfYear(new Date(selectedYear, 11, 31));
-    const daysInYear = eachDayOfInterval({ start: startDate, end: endDate });
+    const monthsInYear = Array.from({ length: 12 }, (_, i) => i);
 
     // Map activity data by date string for O(1) lookups
     const activityMap = new Map<string, number>();
     activity.forEach(a => {
-        // activity dateStr is YYYY-MM-DD
         activityMap.set(a.dateStr, a.secondsStudied);
     });
 
-    // Group days into weeks (columns)
-    // A week is an array of 7 elements (Date or null)
-    // In JS, getDay() returns 0 for Sunday, 6 for Saturday
-    const weeks: (Date | null)[][] = [];
-    let currentWeek: (Date | null)[] = Array(startDate.getDay()).fill(null);
+    const monthsData = monthsInYear.map(monthIndex => {
+        const monthStart = new Date(selectedYear, monthIndex, 1);
+        const monthEnd = new Date(selectedYear, monthIndex + 1, 0); // last day of month
+        const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-    daysInYear.forEach(day => {
-        currentWeek.push(day);
-        if (currentWeek.length === 7) {
+        const weeks: (Date | null)[][] = [];
+        let currentWeek: (Date | null)[] = Array(monthStart.getDay()).fill(null);
+
+        daysInMonth.forEach(day => {
+            currentWeek.push(day);
+            if (currentWeek.length === 7) {
+                weeks.push(currentWeek);
+                currentWeek = [];
+            }
+        });
+        if (currentWeek.length > 0) {
+            while (currentWeek.length < 7) currentWeek.push(null);
             weeks.push(currentWeek);
-            currentWeek = [];
         }
+
+        return {
+            monthIndex,
+            monthStr: format(monthStart, "MMM"),
+            weeks
+        };
     });
-    if (currentWeek.length > 0) {
-        while (currentWeek.length < 7) currentWeek.push(null);
-        weeks.push(currentWeek);
-    }
 
     // LeetCode Color Scale logic
     const getColorClass = (seconds: number) => {
@@ -109,69 +116,47 @@ export function ActivityHeatmap() {
                 </div>
             </div>
 
-            {/* Heatmap Container */}
-            <div className="flex flex-col w-full max-w-full overflow-hidden">
-                <div className="flex gap-[1px] sm:gap-[2px] md:gap-[3px] mt-6 justify-between w-full">
+            <div className="flex flex-col w-full overflow-hidden">
+                <div className="w-full overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                    <div className="flex gap-4 md:gap-6 mt-4 min-w-max px-2">
 
-                    {/* Week Columns */}
-                    {weeks.map((week, weekIndex) => {
-                        // Find if this week is the boundary to a new month to add spacing
-                        const firstValidDay = week.find(d => d !== null);
-                        const thisMonth = firstValidDay ? firstValidDay.getMonth() : -1;
+                        {monthsData.map((monthData, mIdx) => (
+                            <div key={mIdx} className="flex flex-col gap-2">
+                                <span className="text-[10px] md:text-xs font-semibold text-muted-foreground whitespace-nowrap pl-1 h-4">
+                                    {monthData.monthStr}
+                                </span>
+                                <div className="flex gap-1 md:gap-[3px]">
+                                    {monthData.weeks.map((week, wIdx) => (
+                                        <div key={wIdx} className="relative flex flex-col gap-1 md:gap-[3px]">
+                                            {week.map((day, dIdx) => {
+                                                if (!day) {
+                                                    return <div key={dIdx} className="w-3 h-3 md:w-3.5 md:h-3.5 bg-transparent" />;
+                                                }
 
-                        let isNewMonth = false;
-                        let shouldAddMonthGap = false;
+                                                const dateStr = format(day, "yyyy-MM-dd");
+                                                const seconds = activityMap.get(dateStr) || 0;
+                                                const minutes = Math.ceil(seconds / 60);
+                                                const colorClass = getColorClass(seconds);
 
-                        if (weekIndex === 0 && firstValidDay) {
-                            isNewMonth = true;
-                        } else if (weekIndex > 0) {
-                            const prevWeekFirstDay = weeks[weekIndex - 1].find(d => d !== null);
-                            if (prevWeekFirstDay && thisMonth !== prevWeekFirstDay.getMonth()) {
-                                isNewMonth = true;
-                            }
-                        }
-
-                        if (weekIndex < weeks.length - 1) {
-                            // Find next week's first valid day
-                            const nextWeekFirstDay = weeks[weekIndex + 1].find(d => d !== null);
-                            // If next week's first day is a different month, Add Gap!
-                            if (nextWeekFirstDay && nextWeekFirstDay.getMonth() !== thisMonth) {
-                                shouldAddMonthGap = true;
-                            }
-                        }
-
-                        return (
-                            <div key={weekIndex} className={`relative flex flex-col flex-1 max-w-[10px] gap-[1px] sm:gap-[2px] md:gap-[3px] ${shouldAddMonthGap ? 'mr-[2px] sm:mr-[3px] md:mr-1.5' : ''}`}>
-                                {isNewMonth && firstValidDay && (
-                                    <div className="absolute -top-6 left-0 text-[9px] md:text-xs font-semibold text-muted-foreground whitespace-nowrap hidden sm:block">
-                                        {format(firstValidDay, "MMM")}
-                                    </div>
-                                )}
-                                {week.map((day, dayIndex) => {
-                                    if (!day) {
-                                        return <div key={dayIndex} className="w-full aspect-square transparent" />;
-                                    }
-
-                                    const dateStr = format(day, "yyyy-MM-dd");
-                                    const seconds = activityMap.get(dateStr) || 0;
-                                    const minutes = Math.ceil(seconds / 60);
-                                    const colorClass = getColorClass(seconds);
-
-                                    return (
-                                        <div
-                                            key={dayIndex}
-                                            className={`w-full aspect-square rounded-[1px] md:rounded-[2px] ${colorClass} hover:ring-1 md:hover:ring-2 hover:ring-primary/50 hover:ring-offset-1 hover:ring-offset-background transition-all cursor-pointer relative group`}
-                                        >
-                                            {/* Tooltip */}
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-zinc-900 border border-white/10 text-white text-[11px] font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none shadow-xl">
-                                                {minutes > 0 ? `${minutes} minutes studied` : 'No study activity'} on {format(day, "MMM d, yyyy")}
-                                            </div>
+                                                return (
+                                                    <Tooltip key={dIdx}>
+                                                        <TooltipTrigger asChild>
+                                                            <div
+                                                                className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-[2px] ${colorClass} hover:ring-2 hover:ring-primary/50 hover:ring-offset-1 hover:ring-offset-background transition-all cursor-pointer`}
+                                                            />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className="bg-zinc-900 border border-white/10 text-white text-[11px] font-medium rounded-lg px-3 py-1.5 shadow-xl">
+                                                            {minutes > 0 ? `${minutes} minutes studied` : 'No study activity'} on {format(day, "MMM d, yyyy")}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                );
+                                            })}
                                         </div>
-                                    );
-                                })}
+                                    ))}
+                                </div>
                             </div>
-                        );
-                    })}
+                        ))}
+                    </div>
                 </div>
             </div>
 
