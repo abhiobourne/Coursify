@@ -2,14 +2,14 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { getUserCourses, deleteCourse, getFavoriteVideos, Course, FavoriteVideo, updateCoursePrivacy } from "@/lib/courses";
+import { getUserCourses, deleteCourse, getFavoriteVideos, Course, FavoriteVideo, updateCoursePrivacy, getAllPublicCourses, toggleCourseLike, getUserLikedCourseIds } from "@/lib/courses";
 import { CourseCard } from "@/components/ui/CourseCard";
 import { FavoriteVideoCard } from "@/components/ui/FavoriteVideoCard";
 import { AddCourseDialog } from "@/components/ui/AddCourseDialog";
 import { ActivityHeatmap } from "@/components/ui/ActivityHeatmap";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon, Globe } from "lucide-react";
+import { BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon, Globe, TrendingUp, Clock } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,9 +18,13 @@ export default function Dashboard() {
     const { user, loading: authLoading } = useAuth();
     const [courses, setCourses] = useState<Course[]>([]);
     const [favorites, setFavorites] = useState<FavoriteVideo[]>([]);
-    const [activeTab, setActiveTab] = useState<'courses' | 'favorites'>('courses');
+    const [activeTab, setActiveTab] = useState<'courses' | 'favorites' | 'explore'>('courses');
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const [exploreCourses, setExploreCourses] = useState<Course[]>([]);
+    const [likedCourseIds, setLikedCourseIds] = useState<Set<string>>(new Set());
+    const [exploreSortBy, setExploreSortBy] = useState<'recent' | 'liked'>('recent');
+    const [exploreLoading, setExploreLoading] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -52,6 +56,23 @@ export default function Dashboard() {
         loadCourses();
     }, [user, authLoading, router]);
 
+    useEffect(() => {
+        if (activeTab === 'explore' && exploreCourses.length === 0 && user) {
+            setExploreLoading(true);
+            Promise.all([
+                getAllPublicCourses(),
+                getUserLikedCourseIds(user.uid)
+            ]).then(([publicCourses, likedIds]) => {
+                setExploreCourses(publicCourses);
+                setLikedCourseIds(new Set(likedIds));
+            }).catch(error => {
+                console.error("Error loading explore courses:", error);
+            }).finally(() => {
+                setExploreLoading(false);
+            });
+        }
+    }, [activeTab, exploreCourses.length, user]);
+
     const handleDeleteCourse = async (courseId: string) => {
         try {
             await deleteCourse(courseId);
@@ -74,6 +95,37 @@ export default function Dashboard() {
         } catch (error) {
             console.error("Error updating privacy:", error);
             toast.error("Failed to update privacy");
+        }
+    };
+
+    const handleLikeToggle = async (courseId: string) => {
+        if (!user) {
+            toast.error("Please sign in to like courses");
+            return;
+        }
+
+        const isLiked = likedCourseIds.has(courseId);
+        const newLikedIds = new Set(likedCourseIds);
+        if (isLiked) {
+            newLikedIds.delete(courseId);
+        } else {
+            newLikedIds.add(courseId);
+        }
+        setLikedCourseIds(newLikedIds);
+
+        setExploreCourses(exploreCourses.map(c => {
+            if (c.id === courseId) {
+                return { ...c, likes: (c.likes || 0) + (isLiked ? -1 : 1) };
+            }
+            return c;
+        }));
+
+        try {
+            await toggleCourseLike(courseId, user.uid, isLiked);
+        } catch (error) {
+            setLikedCourseIds(likedCourseIds);
+            setExploreCourses(exploreCourses);
+            toast.error("Failed to update like");
         }
     };
 
@@ -154,15 +206,15 @@ export default function Dashboard() {
                         Favorite Videos
                     </div>
                 </button>
-                <Link
-                    href="/explore"
-                    className="pb-4 px-2 font-medium text-sm transition-colors border-b-2 text-muted-foreground border-transparent hover:text-foreground"
+                <button
+                    onClick={() => setActiveTab('explore')}
+                    className={`pb-4 px-2 font-medium text-sm transition-colors border-b-2 ${activeTab === 'explore' ? 'text-primary border-primary' : 'text-muted-foreground border-transparent hover:text-foreground'}`}
                 >
                     <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4" />
                         Explore
                     </div>
-                </Link>
+                </button>
             </div>
 
             {activeTab === 'courses' && (
@@ -222,6 +274,76 @@ export default function Dashboard() {
                     </div>
                 )
             )}
+
+            {activeTab === 'explore' && (() => {
+                let filtered = exploreCourses.filter(c =>
+                    c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    c.instructorName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    c.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+                );
+
+                if (exploreSortBy === 'liked') {
+                    filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                } else {
+                    filtered.sort((a, b) => (b.updatedAt?.toMillis?.() || 0) - (a.updatedAt?.toMillis?.() || 0));
+                }
+
+                return (
+                    <div className="space-y-6">
+                        <div className="flex bg-muted/50 p-1 rounded-xl w-full sm:w-fit mb-6">
+                            <button
+                                onClick={() => setExploreSortBy('recent')}
+                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${exploreSortBy === 'recent' ? 'bg-white dark:bg-zinc-800 text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                <Clock className="w-4 h-4" /> Recent
+                            </button>
+                            <button
+                                onClick={() => setExploreSortBy('liked')}
+                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${exploreSortBy === 'liked' ? 'bg-white dark:bg-zinc-800 text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                <TrendingUp className="w-4 h-4" /> Most Liked
+                            </button>
+                        </div>
+
+                        {exploreLoading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="space-y-4">
+                                        <Skeleton className="aspect-video w-full rounded-2xl" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-6 w-3/4" />
+                                            <Skeleton className="h-4 w-1/2" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : filtered.length === 0 ? (
+                            <div className="glass-card rounded-2xl p-12 text-center border-dashed border-border hover:border-primary/50 transition-colors">
+                                <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <Globe className="w-8 h-8 text-muted-foreground" />
+                                </div>
+                                <h2 className="text-xl font-semibold text-foreground mb-2">No courses found</h2>
+                                <p className="text-muted-foreground max-w-sm mx-auto mb-6">
+                                    {exploreCourses.length === 0 ? "No public courses available yet." : "No courses match your search criteria."}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filtered.map(course => (
+                                    <CourseCard
+                                        key={course.id}
+                                        course={course}
+                                        isExploreView={true}
+                                        onLikeToggle={handleLikeToggle}
+                                        isLiked={likedCourseIds.has(course.id)}
+                                        currentUserId={user?.uid}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
         </div>
     );
 }

@@ -48,7 +48,7 @@ export default function Navbar() {
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
-                <Link href="/explore" className="text-sm font-bold text-primary dark:text-blue-400 hover:opacity-80 transition-opacity">Explore</Link>
+                <Link href="/dashboard" className="text-sm font-bold text-primary dark:text-blue-400 hover:opacity-80 transition-opacity">Explore</Link>
                 <Link href="/#features" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Features</Link>
                 <Link href="/#testimonials" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Stories</Link>
                 <Link href="/pricing" className="text-sm font-medium text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white transition-colors">Pricing</Link>
@@ -125,7 +125,7 @@ export default function Navbar() {
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-xl cursor-pointer py-2.5 px-3 transition-colors text-foreground dark:text-white">
-                                        <Link href="/explore" className="flex items-center w-full">
+                                        <Link href="/dashboard" className="flex items-center w-full">
                                             <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center mr-3 group-focus:bg-primary/20">
                                                 <Globe className="h-4 w-4" />
                                             </div>
