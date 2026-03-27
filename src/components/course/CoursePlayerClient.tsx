@@ -8,7 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle, Circle, PlayCircle, Loader2, ChevronLeft, Menu, X, Star, Search, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { RichTextEditor } from "@/components/ui/RichTextEditor";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor").then(mod => mod.RichTextEditor), { ssr: false });
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -345,6 +347,7 @@ export default function CoursePlayerClient({
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{completedCount}/{videos.length} Lessons Complete</p>
                 </div>
                 <button
+                    aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className={cn(
                         "p-2 rounded-lg transition-colors",
@@ -380,6 +383,7 @@ export default function CoursePlayerClient({
                         </div>
 
                         <button
+                            aria-label="Share Progress"
                             onClick={handleCopyShareLink}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all text-sm font-medium group shadow-sm"
                         >
@@ -441,6 +445,7 @@ export default function CoursePlayerClient({
                                 <option value="2">2.0x</option>
                             </select>
                             <button
+                                aria-label="Toggle theater mode"
                                 onClick={() => setTheaterMode(!theaterMode)}
                                 className={cn(
                                     "p-2 rounded-lg border transition-all h-10 w-10 flex items-center justify-center",
@@ -452,6 +457,7 @@ export default function CoursePlayerClient({
                             </button>
                             <div className="md:hidden flex-1" /> {/* Spacer for mobile */}
                             <button
+                                aria-label="Share course"
                                 onClick={handleCopyShareLink}
                                 className="md:hidden p-2 rounded-lg border bg-card border-border text-muted-foreground h-10 w-10 flex items-center justify-center"
                             >
@@ -476,6 +482,7 @@ export default function CoursePlayerClient({
                             </button>
 
                             <button
+                                aria-label={activeVideo.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                                 onClick={() => toggleFavorite(activeVideo)}
                                 className={cn(
                                     "flex items-center justify-center h-10 w-10 rounded-xl border transition-all duration-300",
@@ -584,10 +591,16 @@ export default function CoursePlayerClient({
                                 )}
                             >
                                 <div className="relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden bg-zinc-800">
-                                    <img src={video.thumbnailUrl} alt="" className={cn(
-                                        "w-full h-full object-cover transition-transform duration-500",
-                                        !isActive && "group-hover:scale-110"
-                                    )} />
+                                    <Image 
+                                        src={video.thumbnailUrl} 
+                                        alt={`${video.title} thumbnail`} 
+                                        fill
+                                        sizes="96px"
+                                        className={cn(
+                                            "object-cover transition-transform duration-500",
+                                            !isActive && "group-hover:scale-110"
+                                        )} 
+                                    />
                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <PlayCircle className="w-6 h-6 text-white" />
                                     </div>

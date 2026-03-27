@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { FavoriteVideo } from "@/lib/courses";
 import { Play } from "lucide-react";
+import Image from "next/image";
 
 interface FavoriteVideoCardProps {
     video: FavoriteVideo;
+    priority?: boolean;
 }
 
-export function FavoriteVideoCard({ video }: FavoriteVideoCardProps) {
+export function FavoriteVideoCard({ video, priority }: FavoriteVideoCardProps) {
     // Format duration (e.g., 1h 30m)
     const formatDuration = (seconds: number) => {
         const h = Math.floor(seconds / 3600);
@@ -16,16 +18,19 @@ export function FavoriteVideoCard({ video }: FavoriteVideoCardProps) {
     };
 
     return (
-        <Link href={`/course/${video.courseId}?v=${video.videoId}&s=${video.startTime || 0}`} className="group block h-full">
+        <Link href={`/course/${video.courseId}?v=${video.videoId}&s=${video.startTime || 0}`} aria-label={`Play favorite video: ${video.title}`} className="group block h-full">
             <div className="glass-card rounded-2xl overflow-hidden h-full flex flex-col relative group-hover:-translate-y-1 transition-transform duration-300">
 
                 {/* Thumbnail Container */}
                 <div className="relative aspect-video overflow-hidden">
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10" />
-                    <img
+                    <Image
                         src={video.thumbnailUrl}
-                        alt={video.title}
-                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                        alt={`${video.title} thumbnail`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={priority}
+                        className="object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
 
                     {/* Overlay Play Icon */}

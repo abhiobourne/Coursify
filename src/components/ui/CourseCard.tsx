@@ -6,6 +6,7 @@ import { AddCourseDialog } from "./AddCourseDialog";
 import { getCourseVideos, CustomCourseChapter } from "@/lib/courses";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import Image from "next/image";
 import {
     Dialog,
     DialogContent,
@@ -46,6 +47,7 @@ interface CourseCardProps {
     onPrivacyChange?: (courseId: string, privacy: 'private' | 'protected' | 'public') => void;
     onLikeToggle?: (courseId: string) => void;
     isLiked?: boolean;
+    priority?: boolean;
 }
 
 export function CourseCard({
@@ -57,7 +59,8 @@ export function CourseCard({
     currentUserId,
     onPrivacyChange,
     onLikeToggle,
-    isLiked
+    isLiked,
+    priority
 }: CourseCardProps) {
     const [tags, setTags] = useState<string[]>(course.tags || []);
     const isCompleted = course.completedDuration >= course.totalDuration;
@@ -97,10 +100,13 @@ export function CourseCard({
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10" />
-                        <img
+                        <Image
                             src={course.thumbnailUrl}
-                            alt={course.title}
-                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                            alt={`${course.title} thumbnail`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            priority={priority}
+                            className="object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                         />
 
                         {/* Status Overlay */}
@@ -142,11 +148,11 @@ export function CourseCard({
                     {/* Metadata Grid */}
                     <div className="grid grid-cols-2 gap-4 py-1">
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground/60">Progress</span>
+                            <span className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground">Progress</span>
                             <span className="text-xs font-semibold text-foreground">{Math.round(progressPercent)}%</span>
                         </div>
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground/60">Duration</span>
+                            <span className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground">Duration</span>
                             <span className="text-xs font-semibold text-foreground">{formatDuration(course.totalDuration)}</span>
                         </div>
                     </div>
@@ -177,7 +183,7 @@ export function CourseCard({
                             />
                         </div>
                         <div className="flex items-center justify-between">
-                            <Link href={courseUrl} className="flex items-center gap-1.5">
+                            <Link href={courseUrl} aria-label={`Resume course ${course.title}`} className="flex items-center gap-1.5">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                                     <Play className="w-4 h-4 fill-current ml-0.5" />
                                 </div>
@@ -193,6 +199,7 @@ export function CourseCard({
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <button
+                                                    aria-label={`Privacy: ${course.privacy || 'private'}`}
                                                     className={cn(
                                                         "p-1.5 transition-colors flex items-center justify-center",
                                                         course.privacy === 'public' ? "text-green-500 hover:text-green-400" :
@@ -232,6 +239,7 @@ export function CourseCard({
                                     <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
                                         <DialogTrigger asChild>
                                             <button
+                                                aria-label="Add Tag"
                                                 className="p-1.5 text-muted-foreground/40 hover:text-primary transition-colors"
                                                 title="Add Tag"
                                             >
@@ -277,6 +285,7 @@ export function CourseCard({
                                             }}
                                         >
                                             <button
+                                                aria-label="Edit Course"
                                                 className="p-1.5 text-muted-foreground/40 hover:text-primary transition-colors"
                                                 title="Edit Course"
                                             >
@@ -289,6 +298,7 @@ export function CourseCard({
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
                                                 <button
+                                                    aria-label="Delete Course"
                                                     className="p-1.5 text-muted-foreground/40 hover:text-red-500 transition-colors"
                                                     title="Delete Course"
                                                 >
@@ -322,6 +332,7 @@ export function CourseCard({
                             {isExploreView && (
                                 <div className="flex items-center gap-3 relative z-20">
                                     <button
+                                        aria-label="Like course"
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();

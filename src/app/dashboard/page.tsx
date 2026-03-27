@@ -6,7 +6,8 @@ import { getUserCourses, deleteCourse, getFavoriteVideos, Course, FavoriteVideo,
 import { CourseCard } from "@/components/ui/CourseCard";
 import { FavoriteVideoCard } from "@/components/ui/FavoriteVideoCard";
 import { AddCourseDialog } from "@/components/ui/AddCourseDialog";
-import { ActivityHeatmap } from "@/components/ui/ActivityHeatmap";
+import dynamic from "next/dynamic";
+const ActivityHeatmap = dynamic(() => import('@/components/ui/ActivityHeatmap').then(mod => mod.ActivityHeatmap), { ssr: false });
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Plus, Trash2, Library, Star, Search as SearchIcon, Globe, TrendingUp, Clock } from "lucide-react";
@@ -240,10 +241,11 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {courses
                             .filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())))
-                            .map(course => (
+                            .map((course, index) => (
                                 <CourseCard
                                     key={course.id}
                                     course={course}
+                                    priority={index < 4}
                                     onDelete={handleDeleteCourse}
                                     onPrivacyChange={handlePrivacyChange}
                                     currentUserId={user?.uid}
@@ -268,8 +270,8 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {favorites
                             .filter(v => v.title.toLowerCase().includes(searchQuery.toLowerCase()))
-                            .map(video => (
-                                <FavoriteVideoCard key={video.id} video={video} />
+                            .map((video, index) => (
+                                <FavoriteVideoCard key={video.id} video={video} priority={index < 4} />
                             ))}
                     </div>
                 )
@@ -329,10 +331,11 @@ export default function Dashboard() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filtered.map(course => (
+                                {filtered.map((course, index) => (
                                     <CourseCard
                                         key={course.id}
                                         course={course}
+                                        priority={index < 4}
                                         isExploreView={true}
                                         onLikeToggle={handleLikeToggle}
                                         isLiked={likedCourseIds.has(course.id)}
